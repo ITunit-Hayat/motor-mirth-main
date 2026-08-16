@@ -33,12 +33,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                 {n.label}
               </Link>
             ))}
-            <Link
-              to="/admin"
-              className="ml-2 px-4 py-2 text-sm font-semibold rounded-md bg-primary text-primary-foreground hover:opacity-90 transition"
-            >
-              Admin
-            </Link>
           </nav>
           <button
             className="md:hidden p-2 rounded-md hover:bg-secondary"
@@ -63,13 +57,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                   {n.label}
                 </Link>
               ))}
-              <Link
-                to="/admin"
-                onClick={() => setOpen(false)}
-                className="px-3 py-2 rounded-md text-sm font-semibold bg-primary text-primary-foreground text-center mt-2"
-              >
-                Admin Dashboard
-              </Link>
             </div>
           </div>
         )}
