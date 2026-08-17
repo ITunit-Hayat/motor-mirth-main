@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, ArrowLeft, Gauge, Calendar, Cog, Fuel, Shiel
 import { toast } from "sonner";
 import { PublicLayout } from "@/components/PublicLayout";
 import { useDealership, formatMiles, formatPrice } from "@/context/DealershipContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { supabase, type CarRow } from "@/lib/supabase";
 import type { Car } from "@/data/initialCars";
 
@@ -31,6 +32,7 @@ const rowToCar = (r: CarRow): Car => ({
 function CarDetails() {
   const { id } = Route.useParams();
   const { cars, addOrder } = useDealership();
+  const { t } = useLanguage();
   const fromContext = cars.find((c) => String(c.id) === String(id));
 
   const [car, setCar] = useState<Car | null>(fromContext ?? null);
@@ -48,7 +50,6 @@ function CarDetails() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      // `id` column may be BIGINT — match numerically when the param is numeric.
       const value: string | number = /^\d+$/.test(id) ? Number(id) : id;
       const { data, error } = await supabase.from("cars").select("*").eq("id", value).maybeSingle();
       if (cancelled) return;
@@ -82,7 +83,7 @@ function CarDetails() {
           <h1 className="text-3xl font-bold">Car not found</h1>
           <p className="mt-2 text-muted-foreground">This vehicle may have been sold or removed.</p>
           <Link to="/cars" className="mt-6 inline-flex items-center gap-2 text-primary font-semibold">
-            <ArrowLeft className="h-4 w-4" /> Back to inventory
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {t("backToInventory")}
           </Link>
         </div>
       </PublicLayout>
@@ -102,16 +103,15 @@ function CarDetails() {
     const city = String(fd.get("city") || "").trim();
     const notes = String(fd.get("notes") || "").trim();
 
-    if (fullName.length < 2) return toast.error("Please enter your full name.");
-    if (!/^[\d\s+()-]{7,20}$/.test(phone)) return toast.error("Please enter a valid phone number.");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast.error("Please enter a valid email address.");
-    if (notes.length > 1000) return toast.error("Notes must be under 1000 characters.");
+    if (fullName.length < 2) return toast.error(t("fullName"));
+    if (!/^[\d\s+()-]{7,20}$/.test(phone)) return toast.error(t("phoneNumber"));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast.error(t("emailAddress"));
 
     setSubmitting(true);
     try {
       await addOrder({ fullName, phone, email, city, notes, carId: car.id, carTitle: car.title });
       setSubmitted(true);
-      toast.success("Inquiry sent! We'll be in touch shortly.");
+      toast.success(t("inquirySuccessTitle"));
       form.reset();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not send your inquiry. Please try again.");
@@ -120,21 +120,20 @@ function CarDetails() {
     }
   };
 
-
   const specs = [
-    { icon: Calendar, label: "Year", value: car.year },
-    { icon: Gauge, label: "Mileage", value: formatMiles(car.mileage) },
-    { icon: Fuel, label: "Engine", value: car.engine },
-    { icon: Cog, label: "Transmission", value: car.transmission },
-    { icon: ShieldCheck, label: "Condition", value: car.condition },
-    { icon: CheckCircle2, label: "Category", value: car.category },
+    { icon: Calendar, label: t("specYear"), value: car.year },
+    { icon: Gauge, label: t("specMileage"), value: formatMiles(car.mileage) },
+    { icon: Fuel, label: t("specEngine"), value: car.engine },
+    { icon: Cog, label: t("specTransmission"), value: car.transmission },
+    { icon: ShieldCheck, label: t("specCondition"), value: car.condition },
+    { icon: CheckCircle2, label: t("specCategory"), value: car.category },
   ];
 
   return (
     <PublicLayout>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
         <Link to="/cars" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to inventory
+          <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {t("backToInventory")}
         </Link>
 
         <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
@@ -197,7 +196,7 @@ function CarDetails() {
               </div>
 
               <div className="mt-8">
-                <h2 className="text-xl font-bold">Description</h2>
+                <h2 className="text-xl font-bold">{t("description")}</h2>
                 <p className="mt-3 text-muted-foreground leading-relaxed">{car.description}</p>
               </div>
             </div>
@@ -206,29 +205,29 @@ function CarDetails() {
           {/* Inquiry */}
           <aside className="lg:sticky lg:top-24 h-fit">
             <div className="bg-card border border-border rounded-2xl p-6 shadow-elegant">
-              <h2 className="font-display text-xl font-bold">Interested? Reserve a viewing.</h2>
-              <p className="mt-1 text-sm text-muted-foreground">A specialist will reach out within 1 business day.</p>
+              <h2 className="font-display text-xl font-bold">{t("inquiryTitle")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("inquirySubtitle")}</p>
               {submitted ? (
                 <div className="mt-6 rounded-xl bg-secondary p-5 text-center">
                   <CheckCircle2 className="h-10 w-10 mx-auto text-accent" />
-                  <div className="mt-2 font-semibold">Thanks — we got your request!</div>
-                  <p className="mt-1 text-sm text-muted-foreground">We'll be in touch about the {car.title}.</p>
+                  <div className="mt-2 font-semibold">{t("inquirySuccessTitle")}</div>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("inquirySuccessMsg")}</p>
                   <button onClick={() => setSubmitted(false)} className="mt-4 text-sm font-medium text-primary hover:text-accent">
-                    Send another inquiry
+                    {t("btnSendAnother")}
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="mt-5 space-y-3">
-                  <Field name="fullName" label="Full Name" required />
-                  <Field name="phone" label="Phone Number" type="tel" required />
-                  <Field name="email" label="Email" type="email" required />
-                  <Field name="city" label="City" />
+                  <Field name="fullName" label={t("fullName")} required />
+                  <Field name="phone" label={t("phoneNumber")} type="tel" required />
+                  <Field name="email" label={t("emailAddress")} type="email" required />
+                  <Field name="city" label={t("city")} />
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground">Additional Notes</label>
+                    <label className="text-xs font-semibold text-muted-foreground">{t("notes")}</label>
                     <textarea
                       name="notes"
                       rows={3}
-                      placeholder="Trade-in? Financing? Preferred time?"
+                      placeholder={t("notesPlaceholder")}
                       className="mt-1 w-full px-3 py-2 rounded-md bg-background border border-input text-sm resize-none"
                     />
                   </div>
@@ -238,9 +237,8 @@ function CarDetails() {
                     className="w-full h-11 rounded-md bg-gradient-accent text-accent-foreground font-semibold shadow-card hover:opacity-95 transition disabled:opacity-60 inline-flex items-center justify-center gap-2"
                   >
                     {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {submitting ? "Sending…" : "Submit Inquiry"}
+                    {submitting ? "..." : t("btnSubmitInquiry")}
                   </button>
-
                 </form>
               )}
             </div>
@@ -248,6 +246,22 @@ function CarDetails() {
         </div>
       </div>
     </PublicLayout>
+  );
+}
+
+function Field({ name, label, type = "text", required = false }: { name: string; label: string; type?: string; required?: boolean }) {
+  return (
+    <div>
+      <label className="text-xs font-semibold text-muted-foreground">
+        {label} {required && <span className="text-destructive">*</span>}
+      </label>
+      <input
+        name={name}
+        type={type}
+        required={required}
+        className="mt-1 w-full h-10 px-3 rounded-md bg-background border border-input text-sm"
+      />
+    </div>
   );
 }
 

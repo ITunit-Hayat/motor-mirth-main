@@ -4,7 +4,7 @@ import { PublicLayout } from "@/components/PublicLayout";
 import { CarCard } from "@/components/CarCard";
 import { CarGridSkeleton, ErrorState } from "@/components/StateViews";
 import { useDealership } from "@/context/DealershipContext";
-
+import { useLanguage } from "@/context/LanguageContext";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,18 +18,20 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const features = [
-  { icon: ShieldCheck, title: "Certified Inspected", body: "Every vehicle passes a rigorous 150-point inspection before it hits our floor." },
-  { icon: Tag, title: "Transparent Pricing", body: "No hidden fees. What you see is what you pay — with financing options that fit." },
-  { icon: Wrench, title: "Lifetime Support", body: "Complimentary maintenance for the first year, plus 24/7 roadside assistance." },
-  { icon: Users, title: "Trusted by 10k+", body: "Ten thousand happy drivers and counting. Read their stories, then write yours." },
-];
-
 function Home() {
   const { cars, loadingCars, error, refresh } = useDealership();
-  const featured = (cars.filter((c) => c.featured).length ? cars.filter((c) => c.featured) : cars).slice(0, 4);
-  return (
+  const { t } = useLanguage();
 
+  const features = [
+    { icon: ShieldCheck, title: t("featInspectTitle"), body: t("featInspectDesc") },
+    { icon: Tag, title: t("featPriceTitle"), body: t("featPriceDesc") },
+    { icon: Wrench, title: t("featSupportTitle"), body: t("featSupportDesc") },
+    { icon: Users, title: t("featTrustTitle"), body: t("featTrustDesc") },
+  ];
+
+  const featured = (cars.filter((c) => c.featured).length ? cars.filter((c) => c.featured) : cars).slice(0, 4);
+
+  return (
     <PublicLayout>
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
@@ -37,31 +39,30 @@ function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-primary/20" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-24 md:py-32">
           <span className="inline-block px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold tracking-wider uppercase">
-            New Arrivals · 2024
+            {t("heroBadge")}
           </span>
           <h1 className="mt-4 max-w-3xl text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05]">
-            Drive the car you've been <span className="text-accent">dreaming of.</span>
+            {t("heroTitle1")} <span className="text-accent">{t("heroTitle2")}</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-primary-foreground/80">
-            A curated selection of premium new and pre-owned vehicles.
-            Transparent pricing. Instant reservations. Zero pressure.
+            {t("heroDesc")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/cars"
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-gradient-accent text-accent-foreground font-semibold shadow-elegant hover:opacity-95 transition"
             >
-              Browse Cars <ArrowRight className="h-4 w-4" />
+              {t("btnBrowse")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Link>
             <Link
               to="/contact"
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg border border-white/20 text-primary-foreground font-medium hover:bg-white/10 transition"
             >
-              Talk to a specialist
+              {t("btnTalkSpecialist")}
             </Link>
           </div>
           <div className="mt-14 grid grid-cols-3 max-w-lg gap-6">
-            {[["500+", "Cars in stock"], ["10k+", "Happy drivers"], ["4.9★", "Avg. rating"]].map(([k, v]) => (
+            {[["500+", t("statCars")], ["10k+", t("statDrivers")], ["4.9★", t("statRating")]].map(([k, v]) => (
               <div key={v}>
                 <div className="text-2xl md:text-3xl font-display font-bold text-accent">{k}</div>
                 <div className="text-xs md:text-sm opacity-80">{v}</div>
@@ -75,11 +76,11 @@ function Home() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 md:py-20">
         <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold">Featured Inventory</h2>
-            <p className="mt-2 text-muted-foreground">Hand-picked highlights from our showroom floor.</p>
+            <h2 className="text-3xl md:text-4xl font-bold">{t("featuredTitle")}</h2>
+            <p className="mt-2 text-muted-foreground">{t("featuredSubtitle")}</p>
           </div>
           <Link to="/cars" className="text-sm font-semibold text-primary hover:text-accent inline-flex items-center gap-1.5">
-            See all cars <ArrowRight className="h-4 w-4" />
+            {t("seeAllCars")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
           </Link>
         </div>
         {error ? (
@@ -90,17 +91,16 @@ function Home() {
           </div>
         )}
         {!loadingCars && !error && featured.length === 0 && (
-          <p className="text-muted-foreground">No vehicles listed yet. Add your first car from the admin dashboard.</p>
+          <p className="text-muted-foreground">No vehicles listed yet.</p>
         )}
-
       </section>
 
       {/* Why us */}
       <section className="bg-secondary/50 border-y border-border/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-16 md:py-20">
           <div className="max-w-2xl">
-            <h2 className="text-3xl md:text-4xl font-bold">Why choose VelocityMotors</h2>
-            <p className="mt-2 text-muted-foreground">Buying a car should feel exciting, not exhausting. Here's how we help.</p>
+            <h2 className="text-3xl md:text-4xl font-bold">{t("whyChooseUs")}</h2>
+            <p className="mt-2 text-muted-foreground">{t("whySubtitle")}</p>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f) => (
