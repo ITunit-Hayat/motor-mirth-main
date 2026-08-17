@@ -118,38 +118,45 @@ async function writeCarRow(row: Record<string, unknown>, id?: string): Promise<C
 /* ---------- provider ---------- */
 
 export function DealershipProvider({ children }: { children: ReactNode }) {
-  const [cars, setCars] = useState<Car[]>([]);
+  const [cars, setCars] = useState<Car[]>(initialCars);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loadingCars, setLoadingCars] = useState(true);
-  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [loadingCars, setLoadingCars] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchCars = useCallback(async () => {
-    setLoadingCars(true);
-    const { data, error } = await supabase
-      .from("cars")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) setError(error.message);
-    else {
-      setError(null);
-      setCars((data as CarRow[]).map(toCar));
+    try {
+      const { data, error } = await supabase
+        .from("cars")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.warn("Supabase cars fetch warning:", error.message);
+      } else if (data && data.length > 0) {
+        setError(null);
+        setCars((data as CarRow[]).map(toCar));
+      }
+    } catch (e: any) {
+      console.warn("Dealership cars load error:", e);
     }
-    setLoadingCars(false);
   }, []);
 
   const fetchOrders = useCallback(async () => {
-    setLoadingOrders(true);
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (!error && data) setOrders((data as OrderRow[]).map(toOrder));
-    setLoadingOrders(false);
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!error && data) {
+        setOrders((data as OrderRow[]).map(toOrder));
+      }
+    } catch (e: any) {
+      console.warn("Dealership orders load error:", e);
+    }
   }, []);
 
   const refresh = useCallback(async () => {
-    await Promise.all([fetchCars(), fetchOrders()]);
+    await Promise.allSettled([fetchCars(), fetchOrders()]);
   }, [fetchCars, fetchOrders]);
 
   useEffect(() => {
