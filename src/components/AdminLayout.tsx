@@ -1,22 +1,24 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, Car as CarIcon, ClipboardList, ExternalLink, Lock, LogOut, ShieldCheck, KeyRound } from "lucide-react";
 import { useState, useEffect, type ReactNode } from "react";
-
-const items = [
-  { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
-  { to: "/admin/cars", label: "Inventory", icon: CarIcon },
-  { to: "/admin/orders", label: "Orders", icon: ClipboardList },
-];
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 const ADMIN_PASSCODE_KEY = "velocity_admin_auth";
-// The master passcode can be set via VITE_ADMIN_PASSCODE or defaults to "admin2026"
 const MASTER_PASSCODE = import.meta.env.VITE_ADMIN_PASSCODE || "admin2026";
 
 export function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { t } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [passcode, setPasscode] = useState("");
   const [error, setError] = useState("");
+
+  const items = [
+    { to: "/admin", label: t("adminOverview"), icon: LayoutDashboard, exact: true },
+    { to: "/admin/cars", label: t("adminInventory"), icon: CarIcon },
+    { to: "/admin/orders", label: t("adminOrders"), icon: ClipboardList },
+  ];
 
   useEffect(() => {
     const isAuth = localStorage.getItem(ADMIN_PASSCODE_KEY) === "true";
@@ -30,7 +32,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
       setError("");
     } else {
-      setError("Incorrect Passcode. Access denied.");
+      setError(t("incorrectPasscode"));
     }
   };
 
@@ -40,26 +42,27 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     setPasscode("");
   };
 
-  // Loading check
   if (isAuthenticated === null) return null;
 
-  // Login Gate for Admin
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
         <div className="w-full max-w-md bg-card border border-border rounded-2xl p-8 shadow-elegant">
+          <div className="flex justify-end mb-2">
+            <LanguageSwitcher />
+          </div>
           <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
             <Lock className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-center">Owner Security Gate</h1>
+          <h1 className="text-2xl font-bold text-center">{t("adminGateTitle")}</h1>
           <p className="mt-1 text-sm text-center text-muted-foreground">
-            This area is restricted to showroom administrators only.
+            {t("adminGateDesc")}
           </p>
 
           <form onSubmit={handleLogin} className="mt-6 space-y-4">
             <div>
               <label className="text-xs font-semibold text-muted-foreground">
-                Enter Master Passcode
+                {t("enterPasscode")}
               </label>
               <div className="mt-1 relative">
                 <input
@@ -85,13 +88,13 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               type="submit"
               className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90 transition flex items-center justify-center gap-2"
             >
-              <ShieldCheck className="h-4 w-4" /> Unlock Dashboard
+              <ShieldCheck className="h-4 w-4" /> {t("unlockDashboard")}
             </button>
           </form>
 
           <div className="mt-6 text-center border-t border-border/60 pt-4">
             <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">
-              ← Return to public website
+              {t("returnToPublic")}
             </Link>
           </div>
         </div>
@@ -102,9 +105,14 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex bg-muted/40">
       <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground">
-        <div className="h-16 px-6 flex items-center gap-2 font-display font-bold text-lg border-b border-sidebar-border">
-          <span className="h-2.5 w-2.5 rounded-full bg-sidebar-primary" />
-          Admin Panel
+        <div className="h-16 px-6 flex items-center justify-between border-b border-sidebar-border">
+          <div className="flex items-center gap-2 font-display font-bold text-lg">
+            <span className="h-2.5 w-2.5 rounded-full bg-sidebar-primary" />
+            Admin Panel
+          </div>
+        </div>
+        <div className="px-4 py-2 border-b border-sidebar-border">
+          <LanguageSwitcher />
         </div>
         <nav className="flex-1 p-3 space-y-1">
           {items.map((i) => {
@@ -136,7 +144,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition"
           >
-            <LogOut className="h-4 w-4" /> Lock & Sign Out
+            <LogOut className="h-4 w-4" /> {t("lockSignOut")}
           </button>
         </div>
       </aside>
@@ -158,13 +166,16 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               );
             })}
           </div>
-          <button
-            onClick={handleLogout}
-            className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md"
-            title="Sign out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <button
+              onClick={handleLogout}
+              className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md"
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </header>
         <main className="flex-1 p-4 sm:p-8">{children}</main>
       </div>

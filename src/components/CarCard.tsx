@@ -2,8 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { Gauge, Calendar, ArrowRight } from "lucide-react";
 import type { Car } from "@/data/initialCars";
 import { formatMiles, formatPrice } from "@/context/DealershipContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function CarCard({ car }: { car: Car }) {
+  const { t } = useLanguage();
   return (
     <div className="group bg-card rounded-2xl overflow-hidden shadow-card border border-border/60 hover:shadow-elegant transition-all duration-300">
       <div className="aspect-[16/10] overflow-hidden bg-muted relative">
@@ -31,7 +33,7 @@ export function CarCard({ car }: { car: Car }) {
           params={{ id: car.id }}
           className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-accent transition-colors"
         >
-          View Details <ArrowRight className="h-4 w-4" />
+          {t("viewDetails")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
         </Link>
       </div>
     </div>

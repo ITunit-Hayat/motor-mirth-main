@@ -1,16 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { Car, Menu, X, Phone, Mail, MapPin } from "lucide-react";
 import { useState, type ReactNode } from "react";
-
-const nav = [
-  { to: "/", label: "Home" },
-  { to: "/cars", label: "Inventory" },
-  { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
-];
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
+
+  const nav = [
+    { to: "/", label: t("navHome") },
+    { to: "/cars", label: t("navInventory") },
+    { to: "/about", label: t("navAbout") },
+    { to: "/contact", label: t("navContact") },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur">
@@ -21,7 +25,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </span>
             <span>Velocity<span className="text-accent">Motors</span></span>
           </Link>
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-2">
             {nav.map((n) => (
               <Link
                 key={n.to}
@@ -33,14 +37,20 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                 {n.label}
               </Link>
             ))}
+            <div className="mx-2">
+              <LanguageSwitcher />
+            </div>
           </nav>
-          <button
-            className="md:hidden p-2 rounded-md hover:bg-secondary"
-            onClick={() => setOpen((s) => !s)}
-            aria-label="Toggle menu"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <LanguageSwitcher />
+            <button
+              className="p-2 rounded-md hover:bg-secondary"
+              onClick={() => setOpen((s) => !s)}
+              aria-label="Toggle menu"
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
         {open && (
           <div className="md:hidden border-t border-border bg-background">
@@ -71,11 +81,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Car className="h-5 w-5 text-accent" /> VelocityMotors
             </div>
             <p className="mt-3 text-sm opacity-80">
-              Premium pre-owned & new vehicles. Curated inventory, transparent pricing.
+              {t("heroDesc")}
             </p>
           </div>
           <div>
-            <h4 className="font-semibold mb-3">Explore</h4>
+            <h4 className="font-semibold mb-3">{t("navInventory")}</h4>
             <ul className="space-y-2 text-sm opacity-80">
               {nav.map((n) => (
                 <li key={n.to}><Link to={n.to} className="hover:text-accent">{n.label}</Link></li>
@@ -83,7 +93,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-3">Contact</h4>
+            <h4 className="font-semibold mb-3">{t("navContact")}</h4>
             <ul className="space-y-2 text-sm opacity-80">
               <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> (555) 010-2024</li>
               <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@velocitymotors.co</li>
@@ -91,16 +101,14 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-3">Hours</h4>
-            <ul className="space-y-1 text-sm opacity-80">
-              <li>Mon–Fri: 9am – 8pm</li>
-              <li>Sat: 10am – 6pm</li>
-              <li>Sun: Closed</li>
-            </ul>
+            <h4 className="font-semibold mb-3">Language / اللغة</h4>
+            <div className="mt-2">
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
         <div className="border-t border-white/10 py-4 text-center text-xs opacity-60">
-          © {new Date().getFullYear()} VelocityMotors. All rights reserved.
+          © {new Date().getFullYear()} VelocityMotors. {t("copyright")}
         </div>
       </footer>
     </div>
