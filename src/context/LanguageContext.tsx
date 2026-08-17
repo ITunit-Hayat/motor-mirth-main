@@ -111,22 +111,28 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("ar");
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY) as Language;
-    if (saved && (saved === "ar" || saved === "fr" || saved === "en")) {
-      setLanguageState(saved);
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_KEY) as Language;
+      if (saved && (saved === "ar" || saved === "fr" || saved === "en")) {
+        setLanguageState(saved);
+      }
     }
   }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem(STORAGE_KEY, lang);
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = lang;
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, lang);
+      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+      document.documentElement.lang = lang;
+    }
   };
 
   useEffect(() => {
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = language;
+    if (typeof window !== "undefined") {
+      document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+      document.documentElement.lang = language;
+    }
   }, [language]);
 
   const t = (key: TranslationKey): string => {
