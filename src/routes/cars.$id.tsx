@@ -265,18 +265,3 @@ function Field({ name, label, type = "text", required = false }: { name: string;
   );
 }
 
-function Field({ name, label, type = "text", required = false }: { name: string; label: string; type?: string; required?: boolean }) {
-  return (
-    <div>
-      <label className="text-xs font-semibold text-muted-foreground">
-        {label} {required && <span className="text-destructive">*</span>}
-      </label>
-      <input
-        name={name}
-        type={type}
-        required={required}
-        className="mt-1 w-full h-10 px-3 rounded-md bg-background border border-input text-sm"
-      />
-    </div>
-  );
-}
