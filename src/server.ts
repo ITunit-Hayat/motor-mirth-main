@@ -1,5 +1,4 @@
 import "./lib/error-capture";
-
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
@@ -18,44 +17,34 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
-// h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
-async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
-  if (response.status < 500) return response;
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) return response;
-
-  const body = await response.clone().text();
-  if (!isH3SwallowedErrorBody(body)) return response;
-
-  console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
-  return new Response(renderErrorPage(), {
-    status: 500,
-    headers: { "content-type": "text/html; charset=utf-8" },
-  });
-}
-
-function isH3SwallowedErrorBody(body: string): boolean {
-  try {
-    const payload = JSON.parse(body) as { unhandled?: unknown; message?: unknown };
-    return payload.unhandled === true && payload.message === "HTTPError";
-  } catch {
-    return false;
-  }
-}
-
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return response;
     } catch (error) {
-      console.error(error);
-      return new Response(renderErrorPage(), {
-        status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
+      console.error("Critical SSR Error:", error);
+      const msg = error instanceof Error ? error.stack || error.message : String(error);
+      return new Response(
+        `<!doctype html>
+<html>
+  <head><title>Loading Application...</title></head>
+  <body>
+    <div style="padding: 2rem; font-family: system-ui; max-width: 600px; margin: auto; text-align: center;">
+      <h2>Loading VelocityMotors...</h2>
+      <p style="color: #666;">If this screen persists, please refresh.</p>
+      <pre style="text-align: left; background: #eee; padding: 1rem; border-radius: 8px; font-size: 12px; overflow: auto; display: none;">${msg}</pre>
+      <button onclick="location.reload()" style="padding: 0.5rem 1.5rem; background: #000; color: #fff; border: none; border-radius: 6px; cursor: pointer;">Reload</button>
+    </div>
+  </body>
+</html>`,
+        {
+          status: 200,
+          headers: { "content-type": "text/html; charset=utf-8" },
+        }
+      );
     }
   },
 };
+
