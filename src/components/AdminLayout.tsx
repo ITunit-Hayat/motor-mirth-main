@@ -108,7 +108,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         <div className="h-16 px-6 flex items-center justify-between border-b border-sidebar-border">
           <div className="flex items-center gap-2 font-display font-bold text-lg">
             <span className="h-2.5 w-2.5 rounded-full bg-sidebar-primary" />
-            Admin Panel
+            {t("adminPanelTitle")}
           </div>
         </div>
         <div className="px-4 py-2 border-b border-sidebar-border">
@@ -138,7 +138,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             to="/"
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-sidebar-accent"
           >
-            <ExternalLink className="h-4 w-4" /> View Site
+            <ExternalLink className="h-4 w-4" /> {t("adminViewSite")}
           </Link>
           <button
             onClick={handleLogout}

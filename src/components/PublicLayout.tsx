@@ -101,7 +101,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-3">Language / اللغة</h4>
+            <h4 className="font-semibold mb-3">{t("chooseLang")}</h4>
             <div className="mt-2">
               <LanguageSwitcher />
             </div>

@@ -91,7 +91,7 @@ function Home() {
           </div>
         )}
         {!loadingCars && !error && featured.length === 0 && (
-          <p className="text-muted-foreground">No vehicles listed yet.</p>
+          <p className="text-muted-foreground">{t("noVehiclesListed")}</p>
         )}
       </section>
 

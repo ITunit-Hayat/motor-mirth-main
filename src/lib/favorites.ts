@@ -4,6 +4,7 @@ const KEY = "velocity_favorites";
 const EVT = "velocity:favorites-changed";
 
 export function readFavorites(): string[] {
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(KEY);
     const arr = raw ? JSON.parse(raw) : [];
@@ -14,6 +15,7 @@ export function readFavorites(): string[] {
 }
 
 function writeFavorites(ids: string[]) {
+  if (typeof window === "undefined") return;
   try {
     localStorage.setItem(KEY, JSON.stringify(ids));
   } catch { /* storage unavailable */ }

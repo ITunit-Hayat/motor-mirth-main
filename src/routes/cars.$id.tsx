@@ -80,9 +80,9 @@ function CarDetails() {
     return (
       <PublicLayout>
         <div className="mx-auto max-w-3xl px-4 py-24 text-center">
-          <h1 className="text-3xl font-bold">Car not found</h1>
-          <p className="mt-2 text-muted-foreground">This vehicle may have been sold or removed.</p>
-          <Link to="/cars" className="mt-6 inline-flex items-center gap-2 text-primary font-semibold">
+          <h1 className="text-3xl font-bold">{t("carNotFoundTitle")}</h1>
+          <p className="mt-2 text-muted-foreground">{t("carNotFoundDesc")}</p>
+          <Link to="/cars" className="mt-6 inline-flex items-center gap-2 text-primary font-semibold hover:text-accent">
             <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {t("backToInventory")}
           </Link>
         </div>
