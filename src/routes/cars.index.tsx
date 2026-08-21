@@ -1,18 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, Heart } from "lucide-react";
+import { Heart, SlidersHorizontal, X } from "lucide-react";
 import { PublicLayout } from "@/components/PublicLayout";
+import { CompareTray } from "@/components/CompareTray";
 import { CarCard } from "@/components/CarCard";
 import { CarGridSkeleton, ErrorState } from "@/components/StateViews";
-import { useDealership } from "@/context/DealershipContext";
+import { useDealership, formatPrice } from "@/context/DealershipContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useFavorites } from "@/lib/favorites";
 
+type Search = { q?: string; category?: string };
+
 export const Route = createFileRoute("/cars/")({
+  validateSearch: (raw): Search => {
+    const s = raw as Record<string, unknown>;
+    return { q: typeof s.q === "string" ? s.q : undefined, category: typeof s.category === "string" ? s.category : undefined };
+  },
   head: () => ({
     meta: [
       { title: "Browse Inventory — VelocityMotors" },
-      { name: "description", content: "Search and filter our inventory of quality vehicles." },
+      { name: "description", content: "Search and filter our premium inventory." },
     ],
   }),
   component: CarsPage,
@@ -24,22 +31,34 @@ function CarsPage() {
   const { cars, loadingCars, error, refresh } = useDealership();
   const { t } = useLanguage();
   const favs = useFavorites();
+  const search = Route.useSearch() as Search;
+
   const [make, setMake] = useState<string>("All");
-  const [category, setCategory] = useState<string>("All");
-  const [maxPrice, setMaxPrice] = useState<number>(250000);
-  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<string>(search.category ?? "All");
+  const [transmission, setTransmission] = useState<string>("All");
+  const [fuel, setFuel] = useState<string>("All");
+  const [year, setYear] = useState<number>(2015);
+  const [maxPrice, setMaxPrice] = useState<number>(300000);
+  const [maxMileage, setMaxMileage] = useState<number>(80000);
+  const [query, setQuery] = useState(search.q ?? "");
   const [sort, setSort] = useState<SortKey>("newest");
   const [favsOnly, setFavsOnly] = useState(false);
 
-  const makes = useMemo(() => ["All", ...Array.from(new Set(cars.map((c) => c.make))).filter(Boolean)], [cars]);
-  const categories = useMemo(() => ["All", ...Array.from(new Set(cars.map((c) => c.category))).filter(Boolean)], [cars]);
+  const makes = useMemo(() => ["All", ...Array.from(new Set(cars.map((c) => c.make)))], [cars]);
+  const cats = useMemo(() => ["All", ...Array.from(new Set(cars.map((c) => c.category)))], [cars]);
+  const trs = useMemo(() => ["All", ...Array.from(new Set(cars.map((c) => c.transmission).filter(Boolean)))], [cars]);
+  const fuels = useMemo(() => ["All", ...Array.from(new Set(cars.map((c) => c.fuel ?? "").filter(Boolean)))], [cars]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = cars.filter((c) => {
       if (make !== "All" && c.make !== make) return false;
       if (category !== "All" && c.category !== category) return false;
+      if (transmission !== "All" && c.transmission !== transmission) return false;
+      if (fuel !== "All" && (c.fuel ?? "") !== fuel) return false;
+      if (c.year < year) return false;
       if (c.price > maxPrice) return false;
+      if (c.mileage > maxMileage) return false;
       if (favsOnly && !favs.includes(c.id)) return false;
       if (q && ![c.title, c.make, c.model, c.category].join(" ").toLowerCase().includes(q)) return false;
       return true;
@@ -50,7 +69,12 @@ function CarsPage() {
       case "mileage-asc": return [...list].sort((a, b) => a.mileage - b.mileage);
       default: return [...list].sort((a, b) => b.year - a.year);
     }
-  }, [cars, make, category, maxPrice, query, sort, favsOnly, favs]);
+  }, [cars, make, category, transmission, fuel, year, maxPrice, maxMileage, query, sort, favsOnly, favs]);
+
+  const clearAll = () => {
+    setMake("All"); setCategory("All"); setTransmission("All"); setFuel("All");
+    setYear(2015); setMaxPrice(300000); setMaxMileage(80000); setQuery(""); setSort("newest"); setFavsOnly(false);
+  };
 
   const selectCls = "mt-1 w-full h-10 px-3 rounded-md bg-background border border-input text-sm";
 
@@ -62,41 +86,40 @@ function CarsPage() {
             <h1 className="text-3xl sm:text-4xl font-bold">{t("allVehicles")}</h1>
             <p className="mt-2 text-muted-foreground">{filtered.length} {t("resultsCount")}</p>
           </div>
-          <button
-            onClick={() => setFavsOnly((v) => !v)}
-            className={`inline-flex items-center gap-2 h-10 px-4 rounded-md border text-sm font-semibold transition ${
-              favsOnly ? "bg-red-500/10 border-red-500/40 text-red-500" : "border-input hover:bg-secondary"
-            }`}
-          >
-            <Heart className={`h-4 w-4 ${favsOnly ? "fill-red-500" : ""}`} /> {t("favsOnly")}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFavsOnly((v) => !v)}
+              className={`inline-flex items-center gap-2 h-10 px-4 rounded-full border text-sm font-semibold transition ${
+                favsOnly ? "bg-red-500/10 border-red-500/40 text-red-500" : "border-input hover:bg-secondary"
+              }`}
+            >
+              <Heart className={`h-4 w-4 ${favsOnly ? "fill-red-500" : ""}`} /> {t("favsOnly")}
+            </button>
+            <button onClick={clearAll} className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-input hover:bg-secondary text-sm font-semibold">
+              <X className="h-4 w-4" /> {t("clearFilters")}
+            </button>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5 bg-card border border-border p-4 rounded-xl shadow-card">
-          <div className="lg:col-span-2 relative">
-            <label className="text-xs font-semibold text-muted-foreground">{t("searchCars")}</label>
-            <div className="mt-1 relative">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t("searchCars")}
-                className="w-full h-10 pl-9 pr-3 rounded-md bg-background border border-input text-sm rtl:pl-3 rtl:pr-9"
-              />
-              <Search className="h-4 w-4 absolute left-3 top-3 text-muted-foreground rtl:left-auto rtl:right-3" />
-            </div>
+        <div className="mt-8 grid gap-4 lg:grid-cols-5 bg-card border border-border p-5 rounded-2xl shadow-card">
+          <div className="lg:hidden flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <SlidersHorizontal className="h-4 w-4" /> {t("filterAll")}
           </div>
           <div>
             <label className="text-xs font-semibold text-muted-foreground">{t("filterMake")}</label>
-            <select value={make} onChange={(e) => setMake(e.target.value)} className={selectCls}>
-              {makes.map((m) => (<option key={m} value={m}>{m === "All" ? t("filterAll") : m}</option>))}
-            </select>
+            <select value={make} onChange={(e) => setMake(e.target.value)} className={selectCls}>{makes.map((m) => <option key={m} value={m}>{m === "All" ? t("filterAll") : m}</option>)}</select>
           </div>
           <div>
             <label className="text-xs font-semibold text-muted-foreground">{t("filterCategory")}</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectCls}>
-              {categories.map((c) => (<option key={c} value={c}>{c === "All" ? t("filterAll") : c}</option>))}
-            </select>
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectCls}>{cats.map((c) => <option key={c} value={c}>{c === "All" ? t("filterAll") : c}</option>)}</select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground">{t("filterTransmission")}</label>
+            <select value={transmission} onChange={(e) => setTransmission(e.target.value)} className={selectCls}>{trs.map((c) => <option key={c} value={c}>{c === "All" ? t("filterAll") : c}</option>)}</select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground">{t("filterFuel")}</label>
+            <select value={fuel} onChange={(e) => setFuel(e.target.value)} className={selectCls}>{fuels.map((c) => <option key={c} value={c}>{c === "All" ? t("filterAll") : c}</option>)}</select>
           </div>
           <div>
             <label className="text-xs font-semibold text-muted-foreground">{t("sortBy")}</label>
@@ -107,42 +130,40 @@ function CarsPage() {
               <option value="mileage-asc">{t("sortMileageLow")}</option>
             </select>
           </div>
-          <div className="sm:col-span-2 lg:col-span-5">
-            <div className="flex justify-between text-xs font-semibold text-muted-foreground">
-              <span>{t("filterMaxPrice")}</span>
-              <span>${maxPrice.toLocaleString()}</span>
-            </div>
-            <input
-              type="range"
-              min={20000}
-              max={300000}
-              step={5000}
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value))}
-              className="mt-2 w-full accent-primary"
-            />
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground">{t("filterYear")}</label>
+            <select value={year} onChange={(e) => setYear(Number(e.target.value))} className={selectCls}>
+              {[2015, 2018, 2020, 2022, 2023, 2024].map((y) => <option key={y} value={y}>{y}+</option>)}
+            </select>
+          </div>
+          <div className="lg:col-span-2">
+            <div className="flex justify-between text-xs font-semibold text-muted-foreground"><span>{t("filterMaxPrice")}</span><span>{formatPrice(maxPrice)}</span></div>
+            <input type="range" min={20000} max={300000} step={5000} value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full mt-3 accent-accent" />
+          </div>
+          <div className="lg:col-span-2">
+            <div className="flex justify-between text-xs font-semibold text-muted-foreground"><span>{t("filterMaxMileage")}</span><span>{maxMileage.toLocaleString()}</span></div>
+            <input type="range" min={5000} max={80000} step={5000} value={maxMileage} onChange={(e) => setMaxMileage(Number(e.target.value))} className="w-full mt-3 accent-accent" />
           </div>
         </div>
 
-        {/* Grid */}
         <div className="mt-8">
           {error ? (
             <ErrorState message={error} onRetry={() => void refresh()} />
           ) : loadingCars ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"><CarGridSkeleton count={6} /></div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-20 bg-card rounded-xl border border-border">
+            <div className="text-center py-24 bg-card rounded-2xl border border-border">
               <p className="text-muted-foreground">{t("noCarsFound")}</p>
+              <button onClick={clearAll} className="mt-3 inline-block text-sm font-semibold text-primary hover:text-accent">{t("clearFilters")}</button>
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((c) => (
-                <CarCard key={c.id} car={c} />
-              ))}
+              {filtered.map((c) => (<CarCard key={c.id} car={c} />))}
             </div>
           )}
         </div>
       </div>
+      <CompareTray />
     </PublicLayout>
   );
 }

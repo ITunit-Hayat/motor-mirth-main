@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as CompareRouteImport } from './routes/compare'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminCarsRouteImport } from './routes/admin.cars'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
@@ -28,9 +30,19 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -62,7 +74,9 @@ const CarsIdRoute = CarsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/compare': typeof CompareRoute
   '/contact': typeof ContactRoute
+  '/wishlist': typeof WishlistRoute
   '/admin/cars': typeof AdminCarsRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/cars/$id': typeof CarsIdRoute
@@ -72,7 +86,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/compare': typeof CompareRoute
   '/contact': typeof ContactRoute
+  '/wishlist': typeof WishlistRoute
   '/admin/cars': typeof AdminCarsRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/cars/$id': typeof CarsIdRoute
@@ -83,7 +99,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/compare': typeof CompareRoute
   '/contact': typeof ContactRoute
+  '/wishlist': typeof WishlistRoute
   '/admin/cars': typeof AdminCarsRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/cars/$id': typeof CarsIdRoute
@@ -95,7 +113,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/compare'
     | '/contact'
+    | '/wishlist'
     | '/admin/cars'
     | '/admin/orders'
     | '/cars/$id'
@@ -105,7 +125,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/compare'
     | '/contact'
+    | '/wishlist'
     | '/admin/cars'
     | '/admin/orders'
     | '/cars/$id'
@@ -115,7 +137,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/compare'
     | '/contact'
+    | '/wishlist'
     | '/admin/cars'
     | '/admin/orders'
     | '/cars/$id'
@@ -126,7 +150,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  CompareRoute: typeof CompareRoute
   ContactRoute: typeof ContactRoute
+  WishlistRoute: typeof WishlistRoute
   AdminCarsRoute: typeof AdminCarsRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   CarsIdRoute: typeof CarsIdRoute
@@ -150,11 +176,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -198,7 +238,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  CompareRoute: CompareRoute,
   ContactRoute: ContactRoute,
+  WishlistRoute: WishlistRoute,
   AdminCarsRoute: AdminCarsRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   CarsIdRoute: CarsIdRoute,
