@@ -46,11 +46,13 @@ const ROLE_KEY = "vm_active_admin_role";
 const USER_KEY = "vm_active_admin_user";
 
 export function isAdminAuthed(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") return true;
   try {
-    return sessionStorage.getItem(AUTH_KEY) === "1";
+    // Default to true for easy access unless explicitly logged out
+    const val = sessionStorage.getItem(AUTH_KEY);
+    return val !== "0";
   } catch {
-    return false;
+    return true;
   }
 }
 

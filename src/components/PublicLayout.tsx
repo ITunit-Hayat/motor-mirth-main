@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Menu, X, Sun, Moon, Heart, GitCompare, Globe, ChevronDown } from "lucide-react";
+import { Menu, X, Sun, Moon, Heart, GitCompare, Globe, ChevronDown, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useFavorites } from "@/lib/favorites";
@@ -10,7 +10,7 @@ import { useSiteSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 export function PublicLayout({ children }: { children: ReactNode }) {
-  const { t, locale, setLocale } = useLanguage();
+  const { t, locale, setLocale, dir } = useLanguage();
   const { theme, toggle } = useTheme();
   const favs = useFavorites();
   const cmp = useCompareList();
@@ -38,7 +38,18 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground" dir={dir}>
+      {/* Top Demo Shortcut Banner */}
+      <div className="bg-gradient-to-r from-primary via-primary/95 to-accent/90 text-primary-foreground py-1.5 px-4 text-xs font-medium text-center flex items-center justify-center gap-3">
+        <span>✨ تم تحديث نظام الإدارة المتكامل بالكامل (الإحصائيات، المخزون، الطلبات، الثوابت)</span>
+        <Link
+          to="/admin"
+          className="inline-flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-2.5 py-0.5 rounded-full font-bold transition shadow-sm"
+        >
+          <LayoutDashboard className="h-3 w-3" /> دخول لوحة الإدارة (Admin) &larr;
+        </Link>
+      </div>
+
       <header className={cn("sticky top-0 z-40 transition-all", scrolled || open ? "glass shadow-card" : "bg-transparent")}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 font-display font-bold text-lg shrink-0">
@@ -48,13 +59,22 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
           <nav className="hidden lg:flex items-center gap-1 mx-auto">
             {nav.map((n) => (
-              <Link key={n.to} to={n.to} className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary hover:text-foreground/90 text-foreground/80 transition" activeProps={{ className: "text-accent" }}>
+              <Link key={n.to} to={n.to} className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary hover:text-foreground/90 text-foreground/80 transition" activeProps={{ className: "text-accent font-semibold" }}>
                 {n.label}
               </Link>
             ))}
           </nav>
 
           <div className="ml-auto flex items-center gap-1.5">
+            <Link
+              to="/admin"
+              className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-accent/15 hover:bg-accent/25 text-accent text-xs font-bold border border-accent/30 transition mr-1"
+              title="لوحة التحكم الإدارية"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              <span>لوحة الإدارة</span>
+            </Link>
+
             <Link to="/wishlist" className="relative h-10 w-10 grid place-items-center rounded-full hover:bg-secondary" aria-label={t("navWishlist")}>
               <Heart className="h-4 w-4" />
               {favs.length > 0 && <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 grid place-items-center rounded-full bg-accent text-accent-foreground text-[10px] font-bold">{favs.length}</span>}
@@ -91,6 +111,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         {open && (
           <div className="lg:hidden border-t border-border bg-background">
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 py-3 grid gap-1">
+              <Link to="/admin" className="px-3 py-3 rounded-md text-sm font-bold bg-accent/15 text-accent flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" /> لوحة التحكم الإدارية (Admin Panel)
+              </Link>
               {nav.map((n) => (
                 <Link key={n.to} to={n.to} className="px-3 py-3 rounded-md text-sm font-medium hover:bg-secondary">
                   {n.label}
@@ -111,6 +134,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <span>VelocityMotors</span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">{t("footerTagline")}</p>
+            <div className="mt-4">
+              <Link to="/admin" className="inline-flex items-center gap-1.5 text-xs font-bold text-accent hover:underline">
+                <ShieldCheck className="h-4 w-4" /> الدخول إلى لوحة التحكم الإدارية &larr;
+              </Link>
+            </div>
           </div>
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("navInventory")}</h4>
@@ -125,6 +153,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <ul className="mt-3 space-y-1.5 text-sm">
               <li><Link to="/wishlist" className="hover:text-accent">{t("navWishlist")}</Link></li>
               <li><Link to="/compare" className="hover:text-accent">{t("navCompare")}</Link></li>
+              <li><Link to="/admin" className="hover:text-accent">لوحة الإدارة (Admin)</Link></li>
             </ul>
           </div>
           <div>
@@ -137,8 +166,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className="border-t border-border">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 text-xs text-muted-foreground">
-            © {new Date().getFullYear()} VelocityMotors. {t("rightsReserved")}
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 text-xs text-muted-foreground flex justify-between items-center flex-wrap gap-2">
+            <span>© {new Date().getFullYear()} VelocityMotors. {t("rightsReserved")}</span>
+            <Link to="/admin" className="text-muted-foreground hover:text-foreground">
+              بوابة الموظفين والإدارة
+            </Link>
           </div>
         </div>
       </footer>

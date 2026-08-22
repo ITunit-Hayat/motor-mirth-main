@@ -76,11 +76,49 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             منطقة مخصصة لإدارة المخزون، معالجة الطلبات، وتخصيص الموقع.
           </p>
 
-          <div className="mt-4 p-3 bg-secondary/70 rounded-xl text-xs text-muted-foreground text-right space-y-1">
-            <div className="font-semibold text-foreground">خيارات تسجيل الدخول السريع:</div>
-            <div>• المدير العام (Super Admin): <code className="text-accent font-bold">admin2026</code></div>
-            <div>• موظف المبيعات (Sales Agent): <code className="text-blue-500 font-bold">sales2026</code></div>
-            <div>• مسؤول المخزون (Inventory): <code className="text-emerald-500 font-bold">inventory2026</code></div>
+          <div className="mt-4 p-3 bg-secondary/70 rounded-xl text-xs text-muted-foreground text-right space-y-2">
+            <div className="font-semibold text-foreground">دخول فوري بنقرة واحدة (اختر الدور):</div>
+            <div className="grid grid-cols-1 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  adminLogin("admin2026", "admin2026", "SUPER_ADMIN");
+                  setAuthed(true);
+                  setRole("SUPER_ADMIN");
+                  toast.success("تم الدخول بصلاحية: المدير العام (Super Admin)");
+                }}
+                className="w-full text-right px-3 py-2 rounded-lg bg-card hover:bg-accent/10 border border-border flex items-center justify-between text-xs font-semibold"
+              >
+                <span>👑 المدير العام (Super Admin)</span>
+                <span className="text-[10px] text-accent font-bold">دخول فوري &larr;</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  adminLogin("sales2026", "admin2026", "SALES_AGENT");
+                  setAuthed(true);
+                  setRole("SALES_AGENT");
+                  toast.success("تم الدخول بصلاحية: موظف المبيعات (Sales Agent)");
+                }}
+                className="w-full text-right px-3 py-2 rounded-lg bg-card hover:bg-blue-500/10 border border-border flex items-center justify-between text-xs font-semibold"
+              >
+                <span>💼 موظف المبيعات (Sales Agent)</span>
+                <span className="text-[10px] text-blue-500 font-bold">دخول فوري &larr;</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  adminLogin("inventory2026", "admin2026", "INVENTORY_MANAGER");
+                  setAuthed(true);
+                  setRole("INVENTORY_MANAGER");
+                  toast.success("تم الدخول بصلاحية: مسؤول المخزون (Inventory)");
+                }}
+                className="w-full text-right px-3 py-2 rounded-lg bg-card hover:bg-emerald-500/10 border border-border flex items-center justify-between text-xs font-semibold"
+              >
+                <span>🚗 مسؤول المخزون (Inventory)</span>
+                <span className="text-[10px] text-emerald-500 font-bold">دخول فوري &larr;</span>
+              </button>
+            </div>
           </div>
 
           <form
