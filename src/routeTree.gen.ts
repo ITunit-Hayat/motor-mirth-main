@@ -17,6 +17,7 @@ import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminCarsRouteImport } from './routes/admin.cars'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as CarsIndexRouteImport } from './routes/cars.index'
 import { Route as CarsIdRouteImport } from './routes/cars.$id'
 
@@ -60,6 +61,11 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
   path: '/admin/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CarsIndexRoute = CarsIndexRouteImport.update({
   id: '/cars/',
   path: '/cars/',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/admin/cars': typeof AdminCarsRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/cars/$id': typeof CarsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/cars/': typeof CarsIndexRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/admin/cars': typeof AdminCarsRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/cars/$id': typeof CarsIdRoute
   '/admin': typeof AdminIndexRoute
   '/cars': typeof CarsIndexRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/admin/cars': typeof AdminCarsRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/cars/$id': typeof CarsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/cars/': typeof CarsIndexRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/cars'
     | '/admin/orders'
+    | '/admin/settings'
     | '/cars/$id'
     | '/admin/'
     | '/cars/'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/cars'
     | '/admin/orders'
+    | '/admin/settings'
     | '/cars/$id'
     | '/admin'
     | '/cars'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/cars'
     | '/admin/orders'
+    | '/admin/settings'
     | '/cars/$id'
     | '/admin/'
     | '/cars/'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   WishlistRoute: typeof WishlistRoute
   AdminCarsRoute: typeof AdminCarsRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   CarsIdRoute: typeof CarsIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   CarsIndexRoute: typeof CarsIndexRoute
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cars/': {
       id: '/cars/'
       path: '/cars'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   WishlistRoute: WishlistRoute,
   AdminCarsRoute: AdminCarsRoute,
   AdminOrdersRoute: AdminOrdersRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   CarsIdRoute: CarsIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   CarsIndexRoute: CarsIndexRoute,

@@ -5,6 +5,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useFavorites } from "@/lib/favorites";
 import { useCompareList, COMPARE_LIMIT } from "@/lib/compare";
+import { trackPageView } from "@/lib/analytics";
+import { useSiteSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 export function PublicLayout({ children }: { children: ReactNode }) {
@@ -15,6 +17,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const router = useRouterState();
+  const site = useSiteSettings();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -23,7 +26,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => { setOpen(false); }, [router.location.pathname]);
+  useEffect(() => { setOpen(false); trackPageView(router.location.pathname); }, [router.location.pathname]);
 
   const nav = [
     { to: "/", label: t("navHome") },
@@ -93,7 +96,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                   {n.label}
                 </Link>
               ))}
-              <Link to="/admin" className="px-3 py-3 rounded-md text-sm font-medium hover:bg-secondary text-muted-foreground">{t("navAdmin")}</Link>
             </nav>
           </div>
         )}
@@ -123,15 +125,14 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <ul className="mt-3 space-y-1.5 text-sm">
               <li><Link to="/wishlist" className="hover:text-accent">{t("navWishlist")}</Link></li>
               <li><Link to="/compare" className="hover:text-accent">{t("navCompare")}</Link></li>
-              <li><Link to="/admin" className="hover:text-accent">{t("navAdmin")}</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("contactShowroom")}</h4>
             <ul className="mt-3 space-y-1.5 text-sm">
-              <li>{t("contactPhoneVal")}</li>
-              <li>{t("contactEmailVal")}</li>
-              <li>{t("contactLocationVal")}</li>
+              <li>{site.phone}</li>
+              <li>{site.email}</li>
+              <li>{site.address}</li>
             </ul>
           </div>
         </div>

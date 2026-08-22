@@ -10,6 +10,8 @@ import { useDealership, formatMiles, formatPrice } from "@/context/DealershipCon
 import { useLanguage } from "@/context/LanguageContext";
 import { toggleFavorite, useFavorites } from "@/lib/favorites";
 import { toggleCompare, useCompareList, COMPARE_LIMIT } from "@/lib/compare";
+import { trackCarView } from "@/lib/analytics";
+import { useSiteSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/cars/$id")({
@@ -35,6 +37,8 @@ function CarDetails() {
   const isCmp = cmp.includes(id);
 
   useEffect(() => setIdx(0), [id]);
+  useEffect(() => { if (id) trackCarView(id); }, [id]);
+  const site = useSiteSettings();
 
   if (!car) {
     return (
@@ -106,7 +110,7 @@ function CarDetails() {
 
   // Sticky CTA tap-target on mobile
   const waText = encodeURIComponent(`Hi, I'm interested in ${car.title} (ID: ${car.id})`);
-  const waHref = `https://wa.me/15555550101?text=${waText}`;
+  const waHref = `https://wa.me/${site.whatsapp}?text=${waText}`;
 
   return (
     <PublicLayout>
