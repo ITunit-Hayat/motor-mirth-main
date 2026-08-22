@@ -1,0 +1,6 @@
+{
+  "name": "Auto Showcase Hub",
+  "description": "Comprehensive car dealership web application with modern showcase, multi-tab inventory management, live request processing, dynamic attributes, media manager, and role-based access control.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
