@@ -4,10 +4,10 @@ import { t as require_jsx_dev_runtime } from "../_libs/react.mjs";
 import { $ as Check, B as Gauge, I as Image, N as Layers, S as Pencil, a as Upload, b as Plus, c as Trash2, dt as ArrowDown, et as Car, m as Shield, n as X, st as ArrowUp, t as ZoomIn, u as Star, v as Search } from "../_libs/lucide-react.mjs";
 import { a as useDealership, i as formatPrice, r as formatMiles } from "./DealershipContext-CZIneh0B.mjs";
 import { n as toast } from "../_libs/sonner.mjs";
-import { a as hasPermission, i as getActiveRole, t as AdminLayout } from "./AdminLayout-CslNOPkA.mjs";
+import { a as hasPermission, i as getActiveRole, t as AdminLayout } from "./AdminLayout-UG9sri-Y.mjs";
 import { n as ErrorState } from "./StateViews-ChF2SlsX.mjs";
 import { t as useDynamicAttributes } from "./dynamicAttributes-BONL40cQ.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin.cars-BM24pjip.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin.cars-Bf83GLQv.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_dev_runtime = require_jsx_dev_runtime();
 var _jsxFileName$1 = "/app/applet/src/components/MediaManagerModal.tsx";

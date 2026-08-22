@@ -7,7 +7,7 @@ import { b as useNavigate, y as Link } from "../_libs/@tanstack/react-router+[..
 import { A as Lock, J as ClipboardList, M as LayoutDashboard, Q as ChevronDown, W as ExternalLink, Y as CircleCheck, d as Sparkles, et as Car, g as Settings, i as Users, it as Bell, k as LogOut, ut as ArrowLeft } from "../_libs/lucide-react.mjs";
 import { a as useDealership } from "./DealershipContext-CZIneh0B.mjs";
 import { n as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/AdminLayout-CslNOPkA.js
+//#region node_modules/.nitro/vite/services/ssr/assets/AdminLayout-UG9sri-Y.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_dev_runtime = require_jsx_dev_runtime();
 var TEAM_MEMBERS = [
@@ -115,7 +115,7 @@ function hasPermission(role, action) {
 }
 var _jsxFileName = "/app/applet/src/components/AdminLayout.tsx";
 function AdminLayout({ children }) {
-	const [authed, setAuthed] = (0, import_react.useState)(false);
+	const [authed, setAuthed] = (0, import_react.useState)(true);
 	const [pass, setPass] = (0, import_react.useState)("");
 	const [role, setRole] = (0, import_react.useState)("SUPER_ADMIN");
 	const [showRoleMenu, setShowRoleMenu] = (0, import_react.useState)(false);

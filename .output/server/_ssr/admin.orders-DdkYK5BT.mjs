@@ -6,8 +6,8 @@ import { y as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { D as MapPin, F as Inbox, G as DollarSign, H as FileText, O as Mail, T as MessageCircle, W as ExternalLink, c as Trash2, d as Sparkles, n as X, q as Clock, tt as Calendar, v as Search, x as Phone } from "../_libs/lucide-react.mjs";
 import { a as useDealership, i as formatPrice } from "./DealershipContext-CZIneh0B.mjs";
 import { n as toast } from "../_libs/sonner.mjs";
-import { i as getActiveRole, t as AdminLayout } from "./AdminLayout-CslNOPkA.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin.orders-0IjtrrWi.js
+import { i as getActiveRole, t as AdminLayout } from "./AdminLayout-UG9sri-Y.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/admin.orders-DdkYK5BT.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_dev_runtime = require_jsx_dev_runtime();
 var _jsxFileName = "/app/applet/src/routes/admin.orders.tsx?tsr-split=component";

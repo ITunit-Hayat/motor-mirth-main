@@ -5,8 +5,8 @@ import { y as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { J as ClipboardList, N as Layers, T as MessageCircle, U as Eye, c as Trash2, ct as ArrowUpRight, d as Sparkles, et as Car, h as ShieldCheck, s as TrendingUp } from "../_libs/lucide-react.mjs";
 import { a as useDealership, i as formatPrice } from "./DealershipContext-CZIneh0B.mjs";
 import { n as toast } from "../_libs/sonner.mjs";
-import { i as getActiveRole, t as AdminLayout } from "./AdminLayout-CslNOPkA.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin.index-wrMKrUfU.js
+import { i as getActiveRole, t as AdminLayout } from "./AdminLayout-UG9sri-Y.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/admin.index-BJpSloqk.js
 var import_jsx_dev_runtime = require_jsx_dev_runtime();
 var _jsxFileName = "/app/applet/src/routes/admin.index.tsx?tsr-split=component";
 function AdminDashboardHome() {

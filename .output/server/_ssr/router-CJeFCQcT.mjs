@@ -8,7 +8,7 @@ import { t as Toaster } from "../_libs/sonner.mjs";
 import { t as Route$10 } from "./cars._id-VjVHDrp_.mjs";
 import { t as Route$11 } from "./cars.index-DVu-PzuB.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CY3XD-g8.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CJeFCQcT.js
 var import_jsx_dev_runtime = require_jsx_dev_runtime();
 var styles_default = "/assets/styles-BaFwU2-c.css";
 var _jsxFileName = "/app/applet/src/routes/__root.tsx";
@@ -219,12 +219,12 @@ var Route$4 = createFileRoute("/wishlist")({
 	head: () => ({ meta: [{ title: "Wishlist — VelocityMotors" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$4, "component")
 });
-var $$splitComponentImporter$3 = () => import("./admin.index-wrMKrUfU.mjs");
+var $$splitComponentImporter$3 = () => import("./admin.index-BJpSloqk.mjs");
 var Route$3 = createFileRoute("/admin/")({
 	head: () => ({ meta: [{ title: "مركز القيادة — لوحة التحكم الإدارية" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-var $$splitComponentImporter$2 = () => import("./admin.cars-BM24pjip.mjs");
+var $$splitComponentImporter$2 = () => import("./admin.cars-Bf83GLQv.mjs");
 var Route$2 = createFileRoute("/admin/cars")({
 	head: () => ({ meta: [{ title: "وحدة التحكم في المخزون — لوحة الإدارة" }, {
 		name: "description",
@@ -235,7 +235,7 @@ var Route$2 = createFileRoute("/admin/cars")({
 /**
 * Tabbed Advanced Modal Component
 */
-var $$splitComponentImporter$1 = () => import("./admin.orders-0IjtrrWi.mjs");
+var $$splitComponentImporter$1 = () => import("./admin.orders-DdkYK5BT.mjs");
 var Route$1 = createFileRoute("/admin/orders")({
 	head: () => ({ meta: [{ title: "وحدة معالجة الطلبات — لوحة الإدارة" }, {
 		name: "description",
@@ -243,7 +243,7 @@ var Route$1 = createFileRoute("/admin/orders")({
 	}] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin.settings-IO_SVqje.mjs");
+var $$splitComponentImporter = () => import("./admin.settings-BbFjxHEL.mjs");
 var Route = createFileRoute("/admin/settings")({
 	head: () => ({ meta: [{ title: "إدارة الثوابت والصلاحيات — لوحة الإدارة" }, {
 		name: "description",

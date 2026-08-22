@@ -35,7 +35,7 @@ import { useDealership } from "@/context/DealershipContext";
 import { useLanguage } from "@/context/LanguageContext";
 
 export function AdminLayout({ children }: { children: ReactNode }) {
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(true);
   const [pass, setPass] = useState("");
   const [role, setRole] = useState<AdminRole>("SUPER_ADMIN");
   const [showRoleMenu, setShowRoleMenu] = useState(false);
