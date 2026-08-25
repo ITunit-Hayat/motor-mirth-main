@@ -1,6 +1,0 @@
-{
-  "name": "Velocity Motors Admin Dashboard",
-  "description": "Comprehensive dealership management dashboard featuring real-time KPIs, inventory controls, order workflow, media handling with watermark/compression, dynamic car attributes, and role-based access control (RBAC).",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
