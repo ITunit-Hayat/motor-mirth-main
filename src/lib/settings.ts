@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { supabase } from "./supabase";
 
-const KEY = "vm_site_settings";
-const EVT = "vm:settings-changed";
+const CACHE_KEY = "vm_site_settings_cache"; // first-paint cache only — NOT the source of truth
+const TABLE = "site_settings";
+const ROW_ID = "default";
 
 export type SiteSettings = {
   siteName: string;
@@ -23,39 +25,110 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   showDiscountBanner: true,
 };
 
-export function getSettings(): SiteSettings {
+function readCache(): SiteSettings {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
   try {
-    const r = localStorage.getItem(KEY);
+    const r = localStorage.getItem(CACHE_KEY);
     return r ? { ...DEFAULT_SETTINGS, ...JSON.parse(r) } : DEFAULT_SETTINGS;
   } catch {
     return DEFAULT_SETTINGS;
   }
 }
 
-export function saveSettings(s: SiteSettings) {
+function writeCache(s: SiteSettings) {
+  if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(KEY, JSON.stringify(s));
-  } catch {}
-  window.dispatchEvent(new CustomEvent(EVT));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(s));
+  } catch {
+    /* private browsing / storage full — cache is best-effort only */
+  }
 }
 
-export function useSettings(): [SiteSettings, (s: SiteSettings) => void] {
-  const [s, setS] = useState<SiteSettings>(DEFAULT_SETTINGS);
-  const sync = useCallback(() => setS(getSettings()), []);
+/**
+ * Shared, cross-device site settings. Renders the last-known cached value
+ * instantly (no flash of defaults), then loads the real value from Supabase
+ * and stays live-updated via Realtime — so an edit in the admin panel shows
+ * up on every open tab/device without a refresh.
+ */
+export function useSiteSettings(): SiteSettings {
+  const [s, setS] = useState<SiteSettings>(readCache);
+
   useEffect(() => {
-    sync();
-    const h = () => sync();
-    window.addEventListener(EVT, h);
-    window.addEventListener("storage", h);
+    let cancelled = false;
+
+    (async () => {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select("data")
+        .eq("id", ROW_ID)
+        .maybeSingle();
+      if (cancelled) return;
+      if (!error && data?.data) {
+        const merged = {
+          ...DEFAULT_SETTINGS,
+          ...(data.data as Partial<SiteSettings>),
+        };
+        setS(merged);
+        writeCache(merged);
+      }
+      // If the table isn't migrated yet, or the row doesn't exist, keep showing
+      // the cached/default values rather than breaking the page.
+    })();
+
+    const channel = supabase
+      .channel("site-settings-live")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: TABLE,
+          filter: `id=eq.${ROW_ID}`,
+        },
+        (payload) => {
+          const row = payload.new as
+            { data?: Partial<SiteSettings> } | undefined;
+          if (row?.data) {
+            const merged = { ...DEFAULT_SETTINGS, ...row.data };
+            setS(merged);
+            writeCache(merged);
+          }
+        },
+      )
+      .subscribe();
+
     return () => {
-      window.removeEventListener(EVT, h);
-      window.removeEventListener("storage", h);
+      cancelled = true;
+      void supabase.removeChannel(channel);
     };
-  }, [sync]);
-  return [s, saveSettings];
+  }, []);
+
+  return s;
 }
 
-export function useSiteSettings() {
-  const [s] = useSettings();
-  return s;
+/**
+ * [settings, save]. `save` writes to Supabase (shared with every visitor
+ * immediately) and resolves once the write is confirmed — await it to know
+ * whether it actually succeeded before showing a success message.
+ */
+export function useSettings(): [
+  SiteSettings,
+  (s: SiteSettings) => Promise<void>,
+] {
+  const settings = useSiteSettings();
+  const latest = useRef(settings);
+  latest.current = settings;
+
+  const save = useCallback(async (next: SiteSettings) => {
+    writeCache(next); // optimistic — feels instant for the person hitting Save
+    const { error } = await supabase
+      .from(TABLE)
+      .upsert({ id: ROW_ID, data: next, updated_at: new Date().toISOString() });
+    if (error) {
+      writeCache(latest.current); // roll the local cache back on failure
+      throw new Error(error.message);
+    }
+  }, []);
+
+  return [settings, save];
 }
