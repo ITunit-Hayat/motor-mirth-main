@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PublicLayout } from "@/components/PublicLayout";
 import { useLanguage } from "@/context/LanguageContext";
 import { useDealership } from "@/context/DealershipContext";
+import { useSiteSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({ meta: [{ title: "Contact — VelocityMotors" }] }),
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/contact")({
 function ContactPage() {
   const { t } = useLanguage();
   const { addOrder } = useDealership();
+  const site = useSiteSettings();
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -126,9 +128,9 @@ function ContactPage() {
 
           <div className="space-y-4">
             {[
-              { Icon: Phone, label: t("contactPhone"), val: t("contactPhoneVal") },
-              { Icon: Mail, label: t("contactEmail2"), val: t("contactEmailVal") },
-              { Icon: MapPin, label: t("contactShowroom"), val: t("contactLocationVal") },
+              { Icon: Phone, label: t("contactPhone"), val: site.phone },
+              { Icon: Mail, label: t("contactEmail2"), val: site.email },
+              { Icon: MapPin, label: t("contactShowroom"), val: site.address },
             ].map(({ Icon, label, val }) => (
               <div
                 key={label}
