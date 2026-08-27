@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabase";
 
 const CACHE_KEY = "vm_site_settings_cache"; // first-paint cache only — NOT the source of truth
@@ -44,62 +44,80 @@ function writeCache(s: SiteSettings) {
   }
 }
 
-/**
- * Shared, cross-device site settings. Renders the last-known cached value
- * instantly (no flash of defaults), then loads the real value from Supabase
- * and stays live-updated via Realtime — so an edit in the admin panel shows
- * up on every open tab/device without a refresh.
+/*
+ * SINGLETON STORE
+ * ----------------
+ * Half a dozen components (layout footer, contact page, car detail page,
+ * sell page, purchase modal…) all call useSiteSettings() on the very same
+ * page. Each one used to open its own Supabase Realtime channel — and
+ * because they all shared the identical channel name, the second `.on()`
+ * call landed on an already-subscribing channel and Supabase threw
+ * ("cannot add postgres_changes callbacks … after subscribe"), crashing
+ * the page. Fix: open exactly ONE channel for the whole app, and fan its
+ * updates out to every hook instance through a tiny pub/sub.
  */
-export function useSiteSettings(): SiteSettings {
-  const [s, setS] = useState<SiteSettings>(readCache);
+let current: SiteSettings = readCache();
+const listeners = new Set<(s: SiteSettings) => void>();
+let started = false;
 
-  useEffect(() => {
-    let cancelled = false;
+function emit() {
+  writeCache(current);
+  listeners.forEach((l) => l(current));
+}
 
-    (async () => {
-      const { data, error } = await supabase
-        .from(TABLE)
-        .select("data")
-        .eq("id", ROW_ID)
-        .maybeSingle();
-      if (cancelled) return;
+function startOnce() {
+  if (started || typeof window === "undefined") return;
+  started = true;
+
+  void supabase
+    .from(TABLE)
+    .select("data")
+    .eq("id", ROW_ID)
+    .maybeSingle()
+    .then(({ data, error }) => {
       if (!error && data?.data) {
-        const merged = {
+        current = {
           ...DEFAULT_SETTINGS,
           ...(data.data as Partial<SiteSettings>),
         };
-        setS(merged);
-        writeCache(merged);
+        emit();
       }
-      // If the table isn't migrated yet, or the row doesn't exist, keep showing
-      // the cached/default values rather than breaking the page.
-    })();
+      // If the table isn't migrated yet, or the row doesn't exist, keep
+      // showing the cached/default values rather than breaking the page.
+    });
 
-    const channel = supabase
-      .channel("site-settings-live")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: TABLE,
-          filter: `id=eq.${ROW_ID}`,
-        },
-        (payload) => {
-          const row = payload.new as
-            { data?: Partial<SiteSettings> } | undefined;
-          if (row?.data) {
-            const merged = { ...DEFAULT_SETTINGS, ...row.data };
-            setS(merged);
-            writeCache(merged);
-          }
-        },
-      )
-      .subscribe();
+  supabase
+    .channel("site-settings-live")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: TABLE, filter: `id=eq.${ROW_ID}` },
+      (payload) => {
+        const row = payload.new as { data?: Partial<SiteSettings> } | undefined;
+        if (row?.data) {
+          current = { ...DEFAULT_SETTINGS, ...row.data };
+          emit();
+        }
+      },
+    )
+    .subscribe();
+}
 
+/**
+ * Shared, cross-device site settings. Renders the last-known cached value
+ * instantly (no flash of defaults), then loads the real value from Supabase
+ * and stays live-updated via a single app-wide Realtime channel — so an
+ * edit in the admin panel shows up on every open tab/device without a
+ * refresh, no matter how many components on the page use this hook.
+ */
+export function useSiteSettings(): SiteSettings {
+  const [s, setS] = useState<SiteSettings>(current);
+
+  useEffect(() => {
+    startOnce();
+    setS(current); // pick up anything fetched before this component mounted
+    listeners.add(setS);
     return () => {
-      cancelled = true;
-      void supabase.removeChannel(channel);
+      listeners.delete(setS);
     };
   }, []);
 
@@ -116,16 +134,19 @@ export function useSettings(): [
   (s: SiteSettings) => Promise<void>,
 ] {
   const settings = useSiteSettings();
-  const latest = useRef(settings);
-  latest.current = settings;
 
   const save = useCallback(async (next: SiteSettings) => {
-    writeCache(next); // optimistic — feels instant for the person hitting Save
+    const prev = current;
+    current = next;
+    emit(); // optimistic — every open tab updates instantly
+
     const { error } = await supabase
       .from(TABLE)
       .upsert({ id: ROW_ID, data: next, updated_at: new Date().toISOString() });
+
     if (error) {
-      writeCache(latest.current); // roll the local cache back on failure
+      current = prev;
+      emit(); // roll back everywhere on failure
       throw new Error(error.message);
     }
   }, []);
