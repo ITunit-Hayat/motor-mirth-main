@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/components/AdminLayout";
+import { PhoneInput } from "@/components/PhoneInput";
 import { useSettings, type SiteSettings } from "@/lib/settings";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 
@@ -55,17 +56,27 @@ function SettingsPage() {
     }
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPass.trim() || newPass.trim().length < 4) {
       toast.error("يرجى إدخال كلمة مرور لا تقل عن 4 خانات");
       return;
     }
-    changePassword(newPass.trim());
-    setPassSaved(true);
-    setNewPass("");
-    toast.success("تم تحديث كلمة مرور لوحة الإدارة بنجاح!");
-    setTimeout(() => setPassSaved(false), 3000);
+    try {
+      await changePassword(newPass.trim());
+      setPassSaved(true);
+      setNewPass("");
+      toast.success(
+        "تم تحديث كلمة المرور — راح تنطبق على كل من يفتح لوحة الإدارة من أي جهاز",
+      );
+      setTimeout(() => setPassSaved(false), 3000);
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? `تعذّر تحديث كلمة المرور: ${err.message}`
+          : "تعذّر التحديث. تأكد من تشغيل ملف supabase/006_shared_admin_passcode.sql في Supabase.",
+      );
+    }
   };
 
   const input =
@@ -120,12 +131,9 @@ function SettingsPage() {
             <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
               <Phone className="h-3.5 w-3.5" /> رقم الهاتف الرئيسي
             </label>
-            <input
-              value={f.phone}
-              onChange={(e) => set("phone", e.target.value)}
-              className={input}
-              dir="ltr"
-            />
+            <div className="mt-1">
+              <PhoneInput value={f.phone} onChange={(v) => set("phone", v)} />
+            </div>
           </div>
           <div>
             <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
@@ -150,18 +158,14 @@ function SettingsPage() {
           </div>
           <div>
             <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-              <MessageCircle className="h-3.5 w-3.5" /> رقم الواتساب الرسمي (مع
-              رمز الدولة الدولي)
+              <MessageCircle className="h-3.5 w-3.5" /> رقم الواتساب الرسمي
             </label>
-            <input
-              value={f.whatsapp}
-              onChange={(e) =>
-                set("whatsapp", e.target.value.replace(/\D/g, ""))
-              }
-              className={input}
-              placeholder="966555550101"
-              dir="ltr"
-            />
+            <div className="mt-1">
+              <PhoneInput
+                value={f.whatsapp}
+                onChange={(v) => set("whatsapp", v)}
+              />
+            </div>
           </div>
         </div>
 
