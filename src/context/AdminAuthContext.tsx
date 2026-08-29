@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { supabase } from "@/lib/supabase";
 
 export type AdminRole = "SuperAdmin" | "SalesAgent";
 
@@ -7,38 +15,92 @@ type AdminAuthState = {
   isAuthenticated: boolean;
   role: AdminRole | null;
   needsLogin: boolean;
-  signIn: (password: string, role?: AdminRole) => Promise<{ ok: boolean; error?: string }>;
-  loginWithPassword: (password: string) => Promise<{ ok: boolean; error?: string }>;
+  signIn: (
+    password: string,
+    role?: AdminRole,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  loginWithPassword: (
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   loginAsDemo: (role?: AdminRole) => void;
   signOut: () => Promise<void>;
-  changePassword: (newPass: string) => void;
+  changePassword: (newPass: string) => Promise<void>;
   currentPasswordHint: string;
   isSuperAdmin: boolean;
   email: string | null;
 };
 
-const PASSCODE_STORAGE_KEY = "vm_admin_passcode";
 const AUTH_SESSION_KEY = "velocity_admin_passcode_session";
 export const DEFAULT_PASSCODE = "admin123";
+const TABLE = "admin_config";
+const ROW_ID = "default";
 
 const AdminAuthContext = createContext<AdminAuthState | null>(null);
+
+/*
+ * SINGLETON STORE — same reasoning as src/lib/settings.ts:
+ * only ever open ONE Realtime channel for the whole app, no matter how many
+ * times AdminAuthProvider ends up mounted, so we never hit Supabase's
+ * "cannot add postgres_changes callbacks … after subscribe" crash again.
+ */
+let currentPasscode = DEFAULT_PASSCODE;
+const listeners = new Set<(p: string) => void>();
+let started = false;
+
+function emit() {
+  listeners.forEach((l) => l(currentPasscode));
+}
+
+function startOnce() {
+  if (started || typeof window === "undefined") return;
+  started = true;
+
+  void supabase
+    .from(TABLE)
+    .select("passcode")
+    .eq("id", ROW_ID)
+    .maybeSingle()
+    .then(({ data, error }) => {
+      if (!error && data?.passcode) {
+        currentPasscode = data.passcode;
+        emit();
+      }
+      // If admin_config isn't migrated yet, keep the built-in default so the
+      // panel stays reachable rather than locking everyone out.
+    });
+
+  supabase
+    .channel("admin-config-live")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: TABLE, filter: `id=eq.${ROW_ID}` },
+      (payload) => {
+        const row = payload.new as { passcode?: string } | undefined;
+        if (row?.passcode) {
+          currentPasscode = row.passcode;
+          emit();
+        }
+      },
+    )
+    .subscribe();
+}
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<AdminRole | null>(null);
+  const [passcode, setPasscode] = useState(currentPasscode);
 
-  // Get current configured password
-  const getStoredPassword = useCallback(() => {
-    try {
-      return localStorage.getItem(PASSCODE_STORAGE_KEY) || DEFAULT_PASSCODE;
-    } catch {
-      return DEFAULT_PASSCODE;
-    }
+  useEffect(() => {
+    startOnce();
+    setPasscode(currentPasscode);
+    listeners.add(setPasscode);
+    return () => {
+      listeners.delete(setPasscode);
+    };
   }, []);
 
   useEffect(() => {
-    // Check saved session
     try {
       const savedSession = localStorage.getItem(AUTH_SESSION_KEY);
       if (savedSession) {
@@ -56,34 +118,34 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const loginWithPassword = async (pass: string): Promise<{ ok: boolean; error?: string }> => {
-    const trimmed = pass.trim();
-    const stored = getStoredPassword();
-
-    // Accepted passwords: the custom stored password, or standard defaults
-    const valid =
-      trimmed === stored ||
-      trimmed === DEFAULT_PASSCODE ||
-      trimmed === "admin" ||
-      trimmed === "123456";
-
-    if (valid) {
+  const loginWithPassword = async (
+    pass: string,
+  ): Promise<{ ok: boolean; error?: string }> => {
+    if (pass.trim() === passcode) {
       setIsAuthenticated(true);
       setRole("SuperAdmin");
       try {
         localStorage.setItem(
           AUTH_SESSION_KEY,
-          JSON.stringify({ authenticated: true, role: "SuperAdmin", timestamp: Date.now() })
+          JSON.stringify({
+            authenticated: true,
+            role: "SuperAdmin",
+            timestamp: Date.now(),
+          }),
         );
-      } catch {}
+      } catch {
+        /* private browsing — session just won't survive a refresh */
+      }
       return { ok: true };
     }
-
-    return { ok: false, error: "كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى." };
+    return {
+      ok: false,
+      error: "كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى.",
+    };
   };
 
   // Support flexible signature: signIn(password) or signIn(email, password)
-  const signIn = async (firstArg: string, secondArg?: any) => {
+  const signIn = async (firstArg: string, secondArg?: unknown) => {
     const pass = typeof secondArg === "string" ? secondArg : firstArg;
     return loginWithPassword(pass);
   };
@@ -94,26 +156,42 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(
         AUTH_SESSION_KEY,
-        JSON.stringify({ authenticated: true, role: r, timestamp: Date.now() })
+        JSON.stringify({ authenticated: true, role: r, timestamp: Date.now() }),
       );
-    } catch {}
+    } catch {
+      /* private browsing — session just won't survive a refresh */
+    }
   };
 
   const signOut = async () => {
     try {
       localStorage.removeItem(AUTH_SESSION_KEY);
-    } catch {}
+    } catch {
+      /* nothing to clean up */
+    }
     setIsAuthenticated(false);
     setRole(null);
   };
 
-  const changePassword = (newPass: string) => {
+  const changePassword = useCallback(async (newPass: string) => {
     const clean = newPass.trim();
     if (!clean) return;
-    try {
-      localStorage.setItem(PASSCODE_STORAGE_KEY, clean);
-    } catch {}
-  };
+    const prev = currentPasscode;
+    currentPasscode = clean;
+    emit(); // every open admin tab picks up the new password immediately
+
+    const { error } = await supabase.from(TABLE).upsert({
+      id: ROW_ID,
+      passcode: clean,
+      updated_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      currentPasscode = prev;
+      emit();
+      throw new Error(error.message);
+    }
+  }, []);
 
   const value: AdminAuthState = {
     loading,
@@ -125,12 +203,16 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     loginAsDemo,
     signOut,
     changePassword,
-    currentPasswordHint: getStoredPassword(),
+    currentPasswordHint: passcode,
     isSuperAdmin: role === "SuperAdmin" || isAuthenticated,
     email: "admin@velocitymotors.com",
   };
 
-  return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;
+  return (
+    <AdminAuthContext.Provider value={value}>
+      {children}
+    </AdminAuthContext.Provider>
+  );
 }
 
 export function useAdminAuth() {
@@ -145,7 +227,7 @@ export function useAdminAuth() {
       loginWithPassword: async () => ({ ok: true }),
       loginAsDemo: () => {},
       signOut: async () => {},
-      changePassword: () => {},
+      changePassword: async () => {},
       currentPasswordHint: DEFAULT_PASSCODE,
       isSuperAdmin: true,
       email: "admin@velocitymotors.com",
@@ -153,5 +235,3 @@ export function useAdminAuth() {
   }
   return ctx;
 }
-
-
