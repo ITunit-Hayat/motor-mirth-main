@@ -1,124 +1,146 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 
-const KEY_VIEWS = "vm_page_views";
-const KEY_UNIQUE = "vm_unique_visitors";
-const EVT = "vm:analytics";
+const TABLE = "page_views";
+const DETAIL_ROW_LIMIT = 5000; // enough for the 7-day chart & top-pages breakdown
 
-type ViewEntry = { path: string; at: number };
+export type AnalyticsSummary = {
+  totalViews: number;
+  viewsToday: number;
+  viewsLast7Days: { day: string; count: number }[];
+  topPaths: { path: string; count: number }[];
+  carViews: Record<string, number>;
+  /** "loading" until the real shared numbers arrive — never show guessed data. */
+  source: "loading" | "shared" | "unavailable";
+};
 
-function read<T>(k: string, fb: T): T {
-  try { const r = localStorage.getItem(k); return r ? (JSON.parse(r) as T) : fb; } catch { return fb; }
-}
-function write(k: string, v: unknown) {
-  try { localStorage.setItem(k, JSON.stringify(v)); } catch {}
-  window.dispatchEvent(new CustomEvent(EVT));
-}
+const EMPTY: AnalyticsSummary = {
+  totalViews: 0,
+  viewsToday: 0,
+  viewsLast7Days: [],
+  topPaths: [],
+  carViews: {},
+  source: "loading",
+};
 
-/** Record a page view locally (instant) AND in Supabase (shared across all visitors). */
+/** Record a page view in the shared Supabase counter. Fire-and-forget. */
 export function trackPageView(path: string) {
-  const views = read<ViewEntry[]>(KEY_VIEWS, []);
-  views.push({ path, at: Date.now() });
-  write(KEY_VIEWS, views.slice(-2000));
-  if (!read<boolean>(KEY_UNIQUE, false)) write(KEY_UNIQUE, true);
-
-  // Shared counter — fire and forget; silently ignored if the table isn't migrated yet.
-  void supabase.from("page_views").insert({ path }).then(({ error }) => {
-    if (error) console.debug("page_views insert skipped:", error.message);
-  });
+  void supabase
+    .from(TABLE)
+    .insert({ path })
+    .then(({ error }) => {
+      if (error) console.debug("page_views insert skipped:", error.message);
+    });
 }
 
 export function trackCarView(carId: string) {
   trackPageView(`/cars/${carId}`);
 }
 
-export type AnalyticsSummary = {
-  totalViews: number;
-  viewsToday: number;
-  uniqueVisitor: boolean;
-  viewsLast7Days: { day: string; count: number }[];
-  topPaths: { path: string; count: number }[];
-  carViews: Record<string, number>;
-  source: "local" | "shared";
-};
+/** Midnight UTC for "today", so every admin sees the same boundary regardless of their own timezone. */
+function utcDayStart(d: Date): number {
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
 
-function summarize(views: ViewEntry[], source: "local" | "shared"): AnalyticsSummary {
+async function fetchAnalytics(): Promise<AnalyticsSummary> {
   const now = new Date();
-  const todayStart = new Date(now.toDateString()).getTime();
+  const todayStart = utcDayStart(now);
+  const weekStart = todayStart - 6 * 86_400_000;
+
+  const [{ count: totalViews }, { count: viewsToday }, { data: recent }] =
+    await Promise.all([
+      supabase.from(TABLE).select("*", { count: "exact", head: true }),
+      supabase
+        .from(TABLE)
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", new Date(todayStart).toISOString()),
+      supabase
+        .from(TABLE)
+        .select("path, created_at")
+        .gte("created_at", new Date(weekStart).toISOString())
+        .order("created_at", { ascending: false })
+        .limit(DETAIL_ROW_LIMIT),
+    ]);
+
+  const rows = (recent ?? []) as { path: string; created_at: string }[];
+
   const days: { day: string; count: number }[] = [];
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i);
-    const start = new Date(d.toDateString()).getTime();
-    const end = start + 86400000;
+    const dayStart = todayStart - i * 86_400_000;
+    const dayEnd = dayStart + 86_400_000;
     days.push({
-      day: d.toLocaleDateString(undefined, { weekday: "short" }),
-      count: views.filter((v) => v.at >= start && v.at < end).length,
+      day: new Date(dayStart).toLocaleDateString(undefined, {
+        weekday: "short",
+        timeZone: "UTC",
+      }),
+      count: rows.filter((r) => {
+        const t = new Date(r.created_at).getTime();
+        return t >= dayStart && t < dayEnd;
+      }).length,
     });
   }
+
   const byPath = new Map<string, number>();
-  views.forEach((v) => byPath.set(v.path, (byPath.get(v.path) ?? 0) + 1));
+  rows.forEach((r) => byPath.set(r.path, (byPath.get(r.path) ?? 0) + 1));
   const topPaths = [...byPath.entries()]
     .map(([path, count]) => ({ path, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
+
   const carViews: Record<string, number> = {};
   byPath.forEach((count, path) => {
     const m = path.match(/^\/cars\/(.+)$/);
     if (m) carViews[m[1]] = count;
   });
+
   return {
-    totalViews: views.length,
-    viewsToday: views.filter((v) => v.at >= todayStart).length,
-    uniqueVisitor: read<boolean>(KEY_UNIQUE, false),
+    totalViews: totalViews ?? 0,
+    viewsToday: viewsToday ?? 0,
     viewsLast7Days: days,
     topPaths,
     carViews,
-    source,
+    source: "shared",
   };
 }
 
-export function getAnalytics(): AnalyticsSummary {
-  return summarize(read<ViewEntry[]>(KEY_VIEWS, []), "local");
-}
-
 export function resetAnalytics() {
-  write(KEY_VIEWS, []);
-  // Also clear the shared counter so the dashboard zeros out for everyone.
-  void supabase.from("page_views").delete().gte("created_at", "1970-01-01").then(() => {
-    window.dispatchEvent(new CustomEvent(EVT));
-  });
+  void supabase
+    .from(TABLE)
+    .delete()
+    .gte("created_at", "1970-01-01")
+    .then(() => {
+      window.dispatchEvent(new CustomEvent("vm:analytics-reset"));
+    });
 }
 
-/** Live hook: local stats instantly, then upgraded to shared Supabase stats for ALL visitors. */
+/** Live hook: real shared stats from every visitor, on every device, in sync. */
 export function useAnalytics(): AnalyticsSummary {
-  const [summary, setSummary] = useState<AnalyticsSummary>(() => getAnalytics());
+  const [summary, setSummary] = useState<AnalyticsSummary>(EMPTY);
+
   useEffect(() => {
-    const syncLocal = () => setSummary((s) => (s.source === "shared" ? s : getAnalytics()));
-    window.addEventListener(EVT, syncLocal);
-    window.addEventListener("storage", syncLocal);
-
     let cancelled = false;
-    (async () => {
-      try {
-        const { data, error } = await supabase
-          .from("page_views")
-          .select("path, created_at")
-          .order("created_at", { ascending: false })
-          .limit(5000);
-        if (cancelled || error || !data) return;
-        const views: ViewEntry[] = data.map((r: any) => ({
-          path: String(r.path),
-          at: new Date(r.created_at).getTime(),
-        }));
-        setSummary(summarize(views, "shared"));
-      } catch { /* table not migrated yet — local stats stay */ }
-    })();
 
+    const load = () => {
+      fetchAnalytics()
+        .then((s) => {
+          if (!cancelled) setSummary(s);
+        })
+        .catch((err) => {
+          console.debug(
+            "Analytics unavailable:",
+            err instanceof Error ? err.message : err,
+          );
+          if (!cancelled) setSummary((s) => ({ ...s, source: "unavailable" }));
+        });
+    };
+
+    load();
+    window.addEventListener("vm:analytics-reset", load);
     return () => {
       cancelled = true;
-      window.removeEventListener(EVT, syncLocal);
-      window.removeEventListener("storage", syncLocal);
+      window.removeEventListener("vm:analytics-reset", load);
     };
   }, []);
+
   return summary;
 }
