@@ -22,6 +22,7 @@ import { PublicLayout } from "@/components/PublicLayout";
 import { useDealership, formatPrice } from "@/context/DealershipContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSiteSettings } from "@/lib/settings";
+import { PhoneInput } from "@/components/PhoneInput";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/sell")({
@@ -57,10 +58,30 @@ const MAKES = [
 ];
 
 const CONDITIONS = [
-  { id: "Like New", labelEn: "Like New (Flawless)", labelAr: "شبه جديدة (وكالة)", factor: 1.1 },
-  { id: "Excellent", labelEn: "Excellent (Minor wear)", labelAr: "ممتازة جداً (استخدام نظيف)", factor: 1.0 },
-  { id: "Good", labelEn: "Good (Normal wear & tear)", labelAr: "جيدة (استخدام عادي)", factor: 0.88 },
-  { id: "Fair", labelEn: "Fair (Needs minor servicing)", labelAr: "مقبولة (تحتاج صيانة خفيفة)", factor: 0.75 },
+  {
+    id: "Like New",
+    labelEn: "Like New (Flawless)",
+    labelAr: "شبه جديدة (وكالة)",
+    factor: 1.1,
+  },
+  {
+    id: "Excellent",
+    labelEn: "Excellent (Minor wear)",
+    labelAr: "ممتازة جداً (استخدام نظيف)",
+    factor: 1.0,
+  },
+  {
+    id: "Good",
+    labelEn: "Good (Normal wear & tear)",
+    labelAr: "جيدة (استخدام عادي)",
+    factor: 0.88,
+  },
+  {
+    id: "Fair",
+    labelEn: "Fair (Needs minor servicing)",
+    labelAr: "مقبولة (تحتاج صيانة خفيفة)",
+    factor: 0.75,
+  },
 ];
 
 function SellCarPage() {
@@ -79,7 +100,9 @@ function SellCarPage() {
   const [transmission, setTransmission] = useState("Automatic");
   const [fuel, setFuel] = useState("Petrol");
   const [color, setColor] = useState("");
-  const [requestType, setRequestType] = useState<"SellMyCar" | "TradeIn">("SellMyCar");
+  const [requestType, setRequestType] = useState<"SellMyCar" | "TradeIn">(
+    "SellMyCar",
+  );
   const [tradeInTarget, setTradeInTarget] = useState("");
   const [description, setDescription] = useState("");
 
@@ -92,7 +115,9 @@ function SellCarPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
-  const [preferredInspection, setPreferredInspection] = useState<"showroom" | "home">("showroom");
+  const [preferredInspection, setPreferredInspection] = useState<
+    "showroom" | "home"
+  >("showroom");
 
   const [submitting, setSubmitting] = useState(false);
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
@@ -126,7 +151,10 @@ function SellCarPage() {
     const mileageDeduction = Math.max(0, (mileage - 10000) * 0.12);
     const condObj = CONDITIONS.find((c) => c.id === condition) || CONDITIONS[1];
 
-    const raw = Math.max(8000, (base * ageFactor - mileageDeduction) * condObj.factor);
+    const raw = Math.max(
+      8000,
+      (base * ageFactor - mileageDeduction) * condObj.factor,
+    );
     const low = Math.round((raw * 0.94) / 100) * 100;
     const high = Math.round((raw * 1.06) / 100) * 100;
 
@@ -151,7 +179,7 @@ function SellCarPage() {
             toast.success(
               locale === "ar"
                 ? `تمت إضافة ${newImages.length} صور بنجاح`
-                : `Added ${newImages.length} photos.`
+                : `Added ${newImages.length} photos.`,
             );
           }
         }
@@ -168,7 +196,8 @@ function SellCarPage() {
     e.preventDefault();
     if (fullName.trim().length < 2) return toast.error(t("fullName"));
     if (!/^[\d\s+()-]{7,20}$/.test(phone)) return toast.error(t("phoneNumber"));
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast.error(t("emailAddress"));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return toast.error(t("emailAddress"));
 
     setSubmitting(true);
     const refId = `VEL-SELL-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -210,7 +239,9 @@ function SellCarPage() {
       setSubmittedRef(refId);
       toast.success(t("sellSuccessMsg"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error submitting your vehicle.");
+      toast.error(
+        err instanceof Error ? err.message : "Error submitting your vehicle.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -222,7 +253,10 @@ function SellCarPage() {
         {/* HERO BANNER */}
         <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-card via-card/90 to-accent/10 border border-border p-6 sm:p-10 md:p-14 shadow-elegant text-center max-w-5xl mx-auto">
           <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/15 text-accent text-xs font-bold uppercase tracking-wider mb-4 border border-accent/20">
-            <Sparkles className="h-4 w-4" /> {locale === "ar" ? "خدمة بيع واستبدال السيارات" : "Sell & Trade-In Portal"}
+            <Sparkles className="h-4 w-4" />{" "}
+            {locale === "ar"
+              ? "خدمة بيع واستبدال السيارات"
+              : "Sell & Trade-In Portal"}
           </span>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold leading-tight">
@@ -239,9 +273,13 @@ function SellCarPage() {
                 <Zap className="h-5 w-5" />
               </div>
               <div>
-                <div className="font-bold text-sm">{locale === "ar" ? "تقييم وعرض فوري" : "Instant Valuation"}</div>
+                <div className="font-bold text-sm">
+                  {locale === "ar" ? "تقييم وعرض فوري" : "Instant Valuation"}
+                </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
-                  {locale === "ar" ? "أعلى سعر سوقي مضمون بناءً على حالة سيارتك" : "Algorithmic market pricing in real time"}
+                  {locale === "ar"
+                    ? "أعلى سعر سوقي مضمون بناءً على حالة سيارتك"
+                    : "Algorithmic market pricing in real time"}
                 </div>
               </div>
             </div>
@@ -251,9 +289,15 @@ function SellCarPage() {
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
-                <div className="font-bold text-sm">{locale === "ar" ? "فحص مجاني عند باب منزلك" : "Free Inspection"}</div>
+                <div className="font-bold text-sm">
+                  {locale === "ar"
+                    ? "فحص مجاني عند باب منزلك"
+                    : "Free Inspection"}
+                </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
-                  {locale === "ar" ? "فريقنا الهندسي يفحص السيارة عندك بلا أي رسوم" : "We inspect at your home or our showroom"}
+                  {locale === "ar"
+                    ? "فريقنا الهندسي يفحص السيارة عندك بلا أي رسوم"
+                    : "We inspect at your home or our showroom"}
                 </div>
               </div>
             </div>
@@ -263,9 +307,13 @@ function SellCarPage() {
                 <DollarSign className="h-5 w-5" />
               </div>
               <div>
-                <div className="font-bold text-sm">{locale === "ar" ? "تحويل بنكي فوري" : "Instant Payout"}</div>
+                <div className="font-bold text-sm">
+                  {locale === "ar" ? "تحويل بنكي فوري" : "Instant Payout"}
+                </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
-                  {locale === "ar" ? "تحويل المبلغ إلى حسابك مباشرة فور توقيع العقد" : "Immediate wire transfer on title transfer"}
+                  {locale === "ar"
+                    ? "تحويل المبلغ إلى حسابك مباشرة فور توقيع العقد"
+                    : "Immediate wire transfer on title transfer"}
                 </div>
               </div>
             </div>
@@ -281,30 +329,48 @@ function SellCarPage() {
 
             <div>
               <span className="text-xs uppercase font-bold text-accent px-3 py-1 rounded-full bg-accent/10">
-                {locale === "ar" ? "تم تسجيل طلبك بنجاح" : "Submission Received"}
+                {locale === "ar"
+                  ? "تم تسجيل طلبك بنجاح"
+                  : "Submission Received"}
               </span>
               <h2 className="text-2xl sm:text-3xl font-display font-bold mt-3">
                 {year} {make} {model || ""}
               </h2>
               <div className="mt-2 text-sm text-muted-foreground">
-                {t("orderRefNumber")}: <span className="font-mono font-bold text-foreground">{submittedRef}</span>
+                {t("orderRefNumber")}:{" "}
+                <span className="font-mono font-bold text-foreground">
+                  {submittedRef}
+                </span>
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-secondary/50 border border-border text-sm space-y-2 text-left rtl:text-right">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("estimatedValue")}:</span>
+                <span className="text-muted-foreground">
+                  {t("estimatedValue")}:
+                </span>
                 <span className="font-bold text-accent">
-                  {formatPrice(estimatedValue.low)} – {formatPrice(estimatedValue.high)}
+                  {formatPrice(estimatedValue.low)} –{" "}
+                  {formatPrice(estimatedValue.high)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{locale === "ar" ? "اسم المالك" : "Seller"}:</span>
-                <span className="font-semibold">{fullName} ({phone})</span>
+                <span className="text-muted-foreground">
+                  {locale === "ar" ? "اسم المالك" : "Seller"}:
+                </span>
+                <span className="font-semibold">
+                  {fullName} ({phone})
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{locale === "ar" ? "طريقة البيع" : "Request Type"}:</span>
-                <span className="font-semibold">{requestType === "TradeIn" ? "استبدال سيارة" : "بيع مباشر كاش"}</span>
+                <span className="text-muted-foreground">
+                  {locale === "ar" ? "طريقة البيع" : "Request Type"}:
+                </span>
+                <span className="font-semibold">
+                  {requestType === "TradeIn"
+                    ? "استبدال سيارة"
+                    : "بيع مباشر كاش"}
+                </span>
               </div>
             </div>
 
@@ -317,7 +383,8 @@ function SellCarPage() {
                 to="/cars"
                 className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-accent text-accent-foreground font-bold text-sm shadow-md"
               >
-                {t("btnBrowse")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                {t("btnBrowse")}{" "}
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
               </Link>
               <button
                 onClick={() => {
@@ -334,7 +401,10 @@ function SellCarPage() {
           /* FORM & VALUATION GRID */
           <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8 items-start max-w-6xl mx-auto">
             {/* SUBMISSION FORM */}
-            <form onSubmit={handleSubmit} className="space-y-6 bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-card">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6 bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-card"
+            >
               {/* Request Type Selector */}
               <div>
                 <label className="block text-sm font-bold mb-2">
@@ -348,7 +418,7 @@ function SellCarPage() {
                       "p-3.5 rounded-xl border flex items-center justify-center gap-2 font-bold text-sm transition",
                       requestType === "SellMyCar"
                         ? "border-accent bg-accent/15 text-accent shadow-sm"
-                        : "border-border hover:bg-muted/50"
+                        : "border-border hover:bg-muted/50",
                     )}
                   >
                     <DollarSign className="h-4 w-4" />
@@ -362,7 +432,7 @@ function SellCarPage() {
                       "p-3.5 rounded-xl border flex items-center justify-center gap-2 font-bold text-sm transition",
                       requestType === "TradeIn"
                         ? "border-accent bg-accent/15 text-accent shadow-sm"
-                        : "border-border hover:bg-muted/50"
+                        : "border-border hover:bg-muted/50",
                     )}
                   >
                     <CarIcon className="h-4 w-4" />
@@ -374,7 +444,9 @@ function SellCarPage() {
               {requestType === "TradeIn" && (
                 <div>
                   <label className="block text-xs font-bold uppercase text-muted-foreground mb-1">
-                    {locale === "ar" ? "السيارة المستهدفة للشراء من معرضنا" : "Target Car You Want to Buy"}
+                    {locale === "ar"
+                      ? "السيارة المستهدفة للشراء من معرضنا"
+                      : "Target Car You Want to Buy"}
                   </label>
                   <input
                     value={tradeInTarget}
@@ -422,7 +494,11 @@ function SellCarPage() {
                       required
                       value={model}
                       onChange={(e) => setModel(e.target.value)}
-                      placeholder={locale === "ar" ? "مثال: Panamera 4S / M3 Competition" : "e.g. 911 Carrera / M4"}
+                      placeholder={
+                        locale === "ar"
+                          ? "مثال: Panamera 4S / M3 Competition"
+                          : "e.g. 911 Carrera / M4"
+                      }
                       className="w-full h-11 px-3.5 rounded-xl border border-input bg-background text-sm focus:ring-2 focus:ring-accent"
                     />
                   </div>
@@ -436,7 +512,10 @@ function SellCarPage() {
                       onChange={(e) => setYear(Number(e.target.value))}
                       className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm focus:ring-2 focus:ring-accent"
                     >
-                      {Array.from({ length: 25 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                      {Array.from(
+                        { length: 25 },
+                        (_, i) => new Date().getFullYear() - i,
+                      ).map((y) => (
                         <option key={y} value={y}>
                           {y}
                         </option>
@@ -534,13 +613,24 @@ function SellCarPage() {
                       />
                       <Upload className="h-6 w-6 text-accent" />
                       <span className="text-[10px] font-bold mt-1">
-                        {uploading ? "Uploading..." : locale === "ar" ? "اختر صوراً" : "Add Photos"}
+                        {uploading
+                          ? "Uploading..."
+                          : locale === "ar"
+                            ? "اختر صوراً"
+                            : "Add Photos"}
                       </span>
                     </label>
 
                     {images.map((src, i) => (
-                      <div key={i} className="relative h-24 w-28 rounded-2xl overflow-hidden border border-border group bg-muted">
-                        <img src={src} alt="" className="h-full w-full object-cover" />
+                      <div
+                        key={i}
+                        className="relative h-24 w-28 rounded-2xl overflow-hidden border border-border group bg-muted"
+                      >
+                        <img
+                          src={src}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
                         <button
                           type="button"
                           onClick={() => removeImage(i)}
@@ -555,7 +645,9 @@ function SellCarPage() {
 
                 <div>
                   <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
-                    {locale === "ar" ? "ملاحظات إضافية عن الصيانة والمواصفات" : "Service History & Notes"}
+                    {locale === "ar"
+                      ? "ملاحظات إضافية عن الصيانة والمواصفات"
+                      : "Service History & Notes"}
                   </label>
                   <textarea
                     rows={2}
@@ -596,14 +688,7 @@ function SellCarPage() {
                     <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
                       {t("inquiryPhone")} *
                     </label>
-                    <input
-                      required
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+1 555 019 2834"
-                      className="w-full h-11 px-3.5 rounded-xl border border-input bg-background text-sm focus:ring-2 focus:ring-accent"
-                    />
+                    <PhoneInput required value={phone} onChange={setPhone} />
                   </div>
 
                   <div>
@@ -628,7 +713,11 @@ function SellCarPage() {
                       required
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      placeholder={locale === "ar" ? "الرياض / Los Angeles" : "Los Angeles, CA"}
+                      placeholder={
+                        locale === "ar"
+                          ? "الرياض / Los Angeles"
+                          : "Los Angeles, CA"
+                      }
                       className="w-full h-11 px-3.5 rounded-xl border border-input bg-background text-sm focus:ring-2 focus:ring-accent"
                     />
                   </div>
@@ -636,7 +725,9 @@ function SellCarPage() {
 
                 <div>
                   <label className="block text-xs font-semibold uppercase text-muted-foreground mb-2">
-                    {locale === "ar" ? "مكان الفحص المفضل" : "Preferred Free Inspection Location"}
+                    {locale === "ar"
+                      ? "مكان الفحص المفضل"
+                      : "Preferred Free Inspection Location"}
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -646,7 +737,7 @@ function SellCarPage() {
                         "p-3 rounded-xl border text-xs font-bold transition",
                         preferredInspection === "showroom"
                           ? "border-accent bg-accent/15 text-accent"
-                          : "border-border hover:bg-muted/50"
+                          : "border-border hover:bg-muted/50",
                       )}
                     >
                       {locale === "ar" ? "في صالة المعرض" : "At Showroom"}
@@ -658,10 +749,12 @@ function SellCarPage() {
                         "p-3 rounded-xl border text-xs font-bold transition",
                         preferredInspection === "home"
                           ? "border-accent bg-accent/15 text-accent"
-                          : "border-border hover:bg-muted/50"
+                          : "border-border hover:bg-muted/50",
                       )}
                     >
-                      {locale === "ar" ? "فحص متنقل عند منزلي" : "Mobile at My Home"}
+                      {locale === "ar"
+                        ? "فحص متنقل عند منزلي"
+                        : "Mobile at My Home"}
                     </button>
                   </div>
                 </div>
@@ -674,7 +767,11 @@ function SellCarPage() {
                 className="w-full h-12 rounded-xl bg-accent text-accent-foreground font-bold text-base shadow-lg hover:opacity-90 transition flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {submitting ? (
-                  locale === "ar" ? "جاري إرسال الطلب..." : "Submitting..."
+                  locale === "ar" ? (
+                    "جاري إرسال الطلب..."
+                  ) : (
+                    "Submitting..."
+                  )
                 ) : (
                   <>
                     <Zap className="h-5 w-5" />
@@ -692,8 +789,12 @@ function SellCarPage() {
                     <Calculator className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-base">{t("instantValuation")}</h3>
-                    <p className="text-xs text-muted-foreground">{year} {make} {model || ""}</p>
+                    <h3 className="font-bold text-base">
+                      {t("instantValuation")}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {year} {make} {model || ""}
+                    </p>
                   </div>
                 </div>
 
@@ -703,30 +804,45 @@ function SellCarPage() {
                     {t("estimatedValue")}
                   </div>
                   <div className="text-3xl sm:text-4xl font-display font-bold text-foreground">
-                    {formatPrice(estimatedValue.low)} – {formatPrice(estimatedValue.high)}
+                    {formatPrice(estimatedValue.low)} –{" "}
+                    {formatPrice(estimatedValue.high)}
                   </div>
                   <div className="text-xs text-muted-foreground pt-1">
-                    {locale === "ar" ? "متوسط السعر الفوري: " : "Average payout: "}
-                    <span className="font-bold text-accent">{formatPrice(estimatedValue.avg)}</span>
+                    {locale === "ar"
+                      ? "متوسط السعر الفوري: "
+                      : "Average payout: "}
+                    <span className="font-bold text-accent">
+                      {formatPrice(estimatedValue.avg)}
+                    </span>
                   </div>
                 </div>
 
                 {/* Breakdown Specs */}
                 <div className="space-y-2 text-xs border-t border-border pt-4">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("carMake")}:</span>
+                    <span className="text-muted-foreground">
+                      {t("carMake")}:
+                    </span>
                     <span className="font-semibold">{make}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("carYear")}:</span>
+                    <span className="text-muted-foreground">
+                      {t("carYear")}:
+                    </span>
                     <span className="font-semibold">{year}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("carMileage")}:</span>
-                    <span className="font-semibold">{mileage.toLocaleString()} mi</span>
+                    <span className="text-muted-foreground">
+                      {t("carMileage")}:
+                    </span>
+                    <span className="font-semibold">
+                      {mileage.toLocaleString()} mi
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("carCondition")}:</span>
+                    <span className="text-muted-foreground">
+                      {t("carCondition")}:
+                    </span>
                     <span className="font-semibold">{condition}</span>
                   </div>
                 </div>
@@ -735,7 +851,9 @@ function SellCarPage() {
                 <div className="p-4 rounded-2xl bg-secondary/60 text-xs text-muted-foreground space-y-1.5">
                   <div className="flex items-center gap-2 font-bold text-foreground">
                     <ShieldCheck className="h-4 w-4 text-accent shrink-0" />
-                    {locale === "ar" ? "ضمان أفضل عرض شراء" : "Guaranteed Cash Offer"}
+                    {locale === "ar"
+                      ? "ضمان أفضل عرض شراء"
+                      : "Guaranteed Cash Offer"}
                   </div>
                   <p>
                     {locale === "ar"
