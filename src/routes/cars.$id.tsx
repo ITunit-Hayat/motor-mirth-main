@@ -25,12 +25,17 @@ import { toast } from "sonner";
 import { PublicLayout } from "@/components/PublicLayout";
 import { CarCard } from "@/components/CarCard";
 import { CarPurchaseModal } from "@/components/CarPurchaseModal";
-import { useDealership, formatMiles, formatPrice } from "@/context/DealershipContext";
+import {
+  useDealership,
+  formatMiles,
+  formatPrice,
+} from "@/context/DealershipContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { toggleFavorite, useFavorites } from "@/lib/favorites";
 import { toggleCompare, useCompareList, COMPARE_LIMIT } from "@/lib/compare";
 import { trackCarView } from "@/lib/analytics";
 import { useSiteSettings } from "@/lib/settings";
+import { PhoneInput } from "@/components/PhoneInput";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/cars/$id")({
@@ -49,10 +54,14 @@ function CarDetails() {
   const [idx, setIdx] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [reqType, setReqType] = useState<"Purchase" | "TestDrive" | "Financing">("Purchase");
+  const [reqType, setReqType] = useState<
+    "Purchase" | "TestDrive" | "Financing"
+  >("Purchase");
   const [rotation, setRotation] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
-  const [purchaseModal, setPurchaseModal] = useState<null | "reserve" | "buy">(null);
+  const [purchaseModal, setPurchaseModal] = useState<null | "reserve" | "buy">(
+    null,
+  );
   const galleryRef = useRef<HTMLDivElement>(null);
   const isFav = favs.includes(id);
   const isCmp = cmp.includes(id);
@@ -76,7 +85,8 @@ function CarDetails() {
             to="/cars"
             className="mt-6 inline-flex items-center gap-2 text-primary font-semibold"
           >
-            <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {t("backToInventory")}
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{" "}
+            {t("backToInventory")}
           </Link>
         </div>
       </PublicLayout>
@@ -84,10 +94,13 @@ function CarDetails() {
   }
 
   const next = () => setIdx((i) => (i + 1) % car.images.length);
-  const prev = () => setIdx((i) => (i - 1 + car.images.length) % car.images.length);
+  const prev = () =>
+    setIdx((i) => (i - 1 + car.images.length) % car.images.length);
 
   const discounted =
-    car.discount && car.discount > 0 ? Math.round((car.price * (100 - car.discount)) / 100) : null;
+    car.discount && car.discount > 0
+      ? Math.round((car.price * (100 - car.discount)) / 100)
+      : null;
 
   // 360° rotate-by-drag: cycles the list smoothly
   const onDrag = (cx: number) => {
@@ -98,7 +111,8 @@ function CarDetails() {
     const delta = Math.round((x / rect.width - 0.5) * 8);
     setRotation(delta);
     setIdx(
-      ((Math.floor((rotation + delta) / 3) % car.images.length) + car.images.length) %
+      ((Math.floor((rotation + delta) / 3) % car.images.length) +
+        car.images.length) %
         Math.max(1, car.images.length),
     );
   };
@@ -115,7 +129,8 @@ function CarDetails() {
 
     if (fullName.length < 2) return toast.error(t("fullName"));
     if (!/^[\d\s+()-]{7,20}$/.test(phone)) return toast.error(t("phoneNumber"));
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast.error(t("emailAddress"));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return toast.error(t("emailAddress"));
 
     setSubmitting(true);
     try {
@@ -133,7 +148,9 @@ function CarDetails() {
       toast.success(t("inquirySuccessTitle"));
       form.reset();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not send your inquiry.");
+      toast.error(
+        err instanceof Error ? err.message : "Could not send your inquiry.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -149,8 +166,10 @@ function CarDetails() {
   ];
 
   // Sticky CTA tap-target on mobile
-  const waText = encodeURIComponent(`Hi, I'm interested in ${car.title} (ID: ${car.id})`);
-  const waHref = `https://wa.me/${site.whatsapp}?text=${waText}`;
+  const waText = encodeURIComponent(
+    `Hi, I'm interested in ${car.title} (ID: ${car.id})`,
+  );
+  const waHref = `https://wa.me/${site.whatsapp.replace(/\D/g, "")}?text=${waText}`;
 
   return (
     <PublicLayout>
@@ -159,7 +178,8 @@ function CarDetails() {
           to="/cars"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {t("backToInventory")}
+          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{" "}
+          {t("backToInventory")}
         </Link>
 
         <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
@@ -175,7 +195,9 @@ function CarDetails() {
                 src={car.images[idx]}
                 alt={car.title}
                 className="h-full w-full object-cover transition-transform duration-700"
-                style={{ transform: `scale(${1 + Math.abs(rotation) * 0.005})` }}
+                style={{
+                  transform: `scale(${1 + Math.abs(rotation) * 0.005})`,
+                }}
                 loading="eager"
                 fetchPriority="high"
               />
@@ -218,7 +240,12 @@ function CarDetails() {
                         : "border-transparent opacity-70 hover:opacity-100",
                     )}
                   >
-                    <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    <img
+                      src={src}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -271,7 +298,9 @@ function CarDetails() {
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary">
                 {car.category}
               </span>
-              <h1 className="mt-3 text-3xl md:text-4xl font-bold">{car.title}</h1>
+              <h1 className="mt-3 text-3xl md:text-4xl font-bold">
+                {car.title}
+              </h1>
               <div className="mt-2 flex items-baseline gap-3">
                 {discounted ? (
                   <>
@@ -286,13 +315,18 @@ function CarDetails() {
                     </span>
                   </>
                 ) : (
-                  <span className="text-3xl font-bold text-accent">{formatPrice(car.price)}</span>
+                  <span className="text-3xl font-bold text-accent">
+                    {formatPrice(car.price)}
+                  </span>
                 )}
               </div>
 
               <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {specs.map((s) => (
-                  <div key={s.label} className="bg-card border border-border rounded-xl p-4">
+                  <div
+                    key={s.label}
+                    className="bg-card border border-border rounded-xl p-4"
+                  >
                     <div className="flex items-center gap-2 text-muted-foreground text-xs">
                       <s.Icon className="h-4 w-4" /> {s.label}
                     </div>
@@ -301,7 +335,9 @@ function CarDetails() {
                 ))}
                 {car.color && (
                   <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="text-muted-foreground text-xs">{t("specColor")}</div>
+                    <div className="text-muted-foreground text-xs">
+                      {t("specColor")}
+                    </div>
                     <div className="mt-1 font-semibold flex items-center gap-2">
                       <span
                         className="inline-block h-3 w-3 rounded-full"
@@ -327,13 +363,17 @@ function CarDetails() {
                 )}
                 {typeof car.cylinders === "number" && car.cylinders > 0 && (
                   <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="text-muted-foreground text-xs">{t("specCylinders")}</div>
+                    <div className="text-muted-foreground text-xs">
+                      {t("specCylinders")}
+                    </div>
                     <div className="mt-1 font-semibold">{car.cylinders}</div>
                   </div>
                 )}
                 {car.fuel && (
                   <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="text-muted-foreground text-xs">{t("specFuel")}</div>
+                    <div className="text-muted-foreground text-xs">
+                      {t("specFuel")}
+                    </div>
                     <div className="mt-1 font-semibold">{car.fuel}</div>
                   </div>
                 )}
@@ -341,13 +381,18 @@ function CarDetails() {
 
               <div className="mt-8">
                 <h2 className="text-xl font-bold">{t("description")}</h2>
-                <p className="mt-3 text-muted-foreground leading-relaxed">{car.description}</p>
+                <p className="mt-3 text-muted-foreground leading-relaxed">
+                  {car.description}
+                </p>
               </div>
             </div>
           </div>
 
           {/* INQUIRY + FINANCE */}
-          <aside id="inquiry-form" className="lg:sticky lg:top-24 h-fit space-y-4">
+          <aside
+            id="inquiry-form"
+            className="lg:sticky lg:top-24 h-fit space-y-4"
+          >
             {/* INSTANT BUY & RESERVE HERO CARD */}
             <div className="bg-gradient-to-br from-card via-card to-accent/10 border-2 border-accent/40 rounded-2xl p-5 sm:p-6 shadow-elegant space-y-4">
               <div className="flex items-center justify-between">
@@ -378,7 +423,9 @@ function CarDetails() {
                   className="w-full h-12 rounded-xl bg-accent text-accent-foreground font-bold text-sm shadow-md hover:opacity-95 transition flex items-center justify-center gap-2"
                 >
                   <Lock className="h-4 w-4" />
-                  {locale === "ar" ? "احجز السيارة الآن (عربون $500)" : "Reserve Vehicle ($500 Hold)"}
+                  {locale === "ar"
+                    ? "احجز السيارة الآن (عربون $500)"
+                    : "Reserve Vehicle ($500 Hold)"}
                 </button>
 
                 <button
@@ -387,23 +434,35 @@ function CarDetails() {
                   className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition flex items-center justify-center gap-2"
                 >
                   <DollarSign className="h-4 w-4" />
-                  {locale === "ar" ? "شراء كامل أونلاين" : "Buy Full Price Online"}
+                  {locale === "ar"
+                    ? "شراء كامل أونلاين"
+                    : "Buy Full Price Online"}
                 </button>
               </div>
 
               <div className="pt-2 border-t border-border/80 flex items-center justify-between text-[11px] text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-accent" />
-                  {locale === "ar" ? "ضمان استرداد العربون" : "100% Refundable Deposit"}
+                  {locale === "ar"
+                    ? "ضمان استرداد العربون"
+                    : "100% Refundable Deposit"}
                 </span>
                 <span>•</span>
-                <span>{locale === "ar" ? "فحص وكالة 200 نقطة" : "200-Point Inspected"}</span>
+                <span>
+                  {locale === "ar"
+                    ? "فحص وكالة 200 نقطة"
+                    : "200-Point Inspected"}
+                </span>
               </div>
             </div>
 
             <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-              <h2 className="font-display text-lg font-bold">{t("inquiryTitle")}</h2>
-              <p className="mt-1 text-xs text-muted-foreground">{t("inquirySubtitle")}</p>
+              <h2 className="font-display text-lg font-bold">
+                {t("inquiryTitle")}
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("inquirySubtitle")}
+              </p>
 
               {!submitted && (
                 <div className="mt-4 grid grid-cols-3 gap-1.5">
@@ -433,8 +492,12 @@ function CarDetails() {
               {submitted ? (
                 <div className="mt-6 rounded-xl bg-secondary p-5 text-center">
                   <CheckCircle2 className="h-10 w-10 mx-auto text-accent" />
-                  <div className="mt-2 font-semibold">{t("inquirySuccessTitle")}</div>
-                  <p className="mt-1 text-sm text-muted-foreground">{t("inquirySuccessMsg")}</p>
+                  <div className="mt-2 font-semibold">
+                    {t("inquirySuccessTitle")}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {t("inquirySuccessMsg")}
+                  </p>
                   <button
                     onClick={() => setSubmitted(false)}
                     className="mt-4 text-sm font-medium text-primary hover:text-accent"
@@ -450,21 +513,18 @@ function CarDetails() {
                     required
                     className="w-full h-11 px-3 rounded-md bg-background border border-input text-sm"
                   />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      name="phone"
-                      placeholder={t("inquiryPhone")}
-                      required
-                      className="w-full h-11 px-3 rounded-md bg-background border border-input text-sm"
-                    />
-                    <input
-                      name="email"
-                      type="email"
-                      placeholder={t("inquiryEmail")}
-                      required
-                      className="w-full h-11 px-3 rounded-md bg-background border border-input text-sm"
-                    />
-                  </div>
+                  <PhoneInput
+                    name="phone"
+                    required
+                    placeholder={t("inquiryPhone")}
+                  />
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder={t("inquiryEmail")}
+                    required
+                    className="w-full h-11 px-3 rounded-md bg-background border border-input text-sm"
+                  />
                   <input
                     name="city"
                     placeholder={t("inquiryCity")}
@@ -483,7 +543,8 @@ function CarDetails() {
                   >
                     {submitting ? (
                       <>
-                        <Loader2 className="h-4 w-4 spin" /> {t("inquirySending")}
+                        <Loader2 className="h-4 w-4 spin" />{" "}
+                        {t("inquirySending")}
                       </>
                     ) : (
                       t("inquirySubmit")
@@ -505,7 +566,9 @@ function CarDetails() {
               price={car.price}
               onApply={() => {
                 setReqType("Financing");
-                document.getElementById("inquiry-form")?.scrollIntoView({ behavior: "smooth" });
+                document
+                  .getElementById("inquiry-form")
+                  ?.scrollIntoView({ behavior: "smooth" });
               }}
             />
           </aside>
@@ -555,7 +618,9 @@ function CarDetails() {
           >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h2 className="text-xl font-bold font-display">{t("historyTitle")}</h2>
+                <h2 className="text-xl font-bold font-display">
+                  {t("historyTitle")}
+                </h2>
                 <p className="text-xs text-muted-foreground mt-1">
                   {car.title} • {t("reportsAvailable")}
                 </p>
@@ -572,7 +637,9 @@ function CarDetails() {
               <div className="flex items-start justify-between p-3 rounded-lg bg-secondary">
                 <div>
                   <div className="font-semibold">{t("historyOwners")}</div>
-                  <div className="text-muted-foreground text-xs">CARFAX-verified</div>
+                  <div className="text-muted-foreground text-xs">
+                    CARFAX-verified
+                  </div>
                 </div>
                 <span className="font-bold text-accent">
                   {car.previousOwners !== undefined && car.previousOwners > 0
@@ -583,20 +650,30 @@ function CarDetails() {
               <div className="flex items-start justify-between p-3 rounded-lg bg-secondary">
                 <div>
                   <div className="font-semibold">{t("historyAccidents")}</div>
-                  <div className="text-muted-foreground text-xs">Police and insurance records</div>
+                  <div className="text-muted-foreground text-xs">
+                    Police and insurance records
+                  </div>
                 </div>
-                <span className="font-bold text-accent">{t("historyAccidentsVal")}</span>
+                <span className="font-bold text-accent">
+                  {t("historyAccidentsVal")}
+                </span>
               </div>
               <div className="flex items-start justify-between p-3 rounded-lg bg-secondary">
                 <div>
                   <div className="font-semibold">{t("historyService")}</div>
-                  <div className="text-muted-foreground text-xs">23 service records on file</div>
+                  <div className="text-muted-foreground text-xs">
+                    23 service records on file
+                  </div>
                 </div>
-                <span className="font-bold text-accent">{t("historyServiceVal")}</span>
+                <span className="font-bold text-accent">
+                  {t("historyServiceVal")}
+                </span>
               </div>
               {car.inspectionReport && (
                 <div className="p-3 rounded-lg bg-secondary">
-                  <div className="font-semibold mb-1">{t("historyInspectionNotes")}</div>
+                  <div className="font-semibold mb-1">
+                    {t("historyInspectionNotes")}
+                  </div>
                   <p className="text-muted-foreground text-xs whitespace-pre-line">
                     {car.inspectionReport}
                   </p>
@@ -610,15 +687,27 @@ function CarDetails() {
   );
 }
 
-function FinanceCalc({ price, onApply }: { price: number; onApply: () => void }) {
+function FinanceCalc({
+  price,
+  onApply,
+}: {
+  price: number;
+  onApply: () => void;
+}) {
   const { t } = useLanguage();
   const [downPct, setDownPct] = useState(20);
   const [rate, setRate] = useState(6);
   const [n, setN] = useState(60);
-  const principal = Math.max(0, price * (1 - Math.min(90, Math.max(0, downPct)) / 100));
+  const principal = Math.max(
+    0,
+    price * (1 - Math.min(90, Math.max(0, downPct)) / 100),
+  );
   const months = Math.max(1, Math.min(120, n));
   const r = Math.max(0, rate) / 100 / 12;
-  const monthly = r > 0 ? (principal * r) / (1 - Math.pow(1 + r, -months)) : principal / months;
+  const monthly =
+    r > 0
+      ? (principal * r) / (1 - Math.pow(1 + r, -months))
+      : principal / months;
   return (
     <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
       <h2 className="font-display text-lg font-bold flex items-center gap-2">
@@ -626,7 +715,9 @@ function FinanceCalc({ price, onApply }: { price: number; onApply: () => void })
       </h2>
       <div className="mt-4 grid grid-cols-3 gap-3">
         <div>
-          <label className="text-xs font-semibold text-muted-foreground">{t("calcDown")}</label>
+          <label className="text-xs font-semibold text-muted-foreground">
+            {t("calcDown")}
+          </label>
           <input
             type="number"
             min={0}
@@ -637,7 +728,9 @@ function FinanceCalc({ price, onApply }: { price: number; onApply: () => void })
           />
         </div>
         <div>
-          <label className="text-xs font-semibold text-muted-foreground">{t("calcRate")}</label>
+          <label className="text-xs font-semibold text-muted-foreground">
+            {t("calcRate")}
+          </label>
           <input
             type="number"
             min={0}
@@ -649,7 +742,9 @@ function FinanceCalc({ price, onApply }: { price: number; onApply: () => void })
           />
         </div>
         <div>
-          <label className="text-xs font-semibold text-muted-foreground">{t("calcTerm")}</label>
+          <label className="text-xs font-semibold text-muted-foreground">
+            {t("calcTerm")}
+          </label>
           <input
             type="number"
             min={6}
@@ -664,10 +759,13 @@ function FinanceCalc({ price, onApply }: { price: number; onApply: () => void })
       <div className="mt-4 rounded-xl bg-secondary p-4 text-center">
         <div className="text-xs text-muted-foreground">{t("calcMonthly")}</div>
         <div className="mt-1 text-2xl font-bold text-accent">
-          {formatPrice(Math.round(monthly))} <span className="text-xs font-normal">/ mo</span>
+          {formatPrice(Math.round(monthly))}{" "}
+          <span className="text-xs font-normal">/ mo</span>
         </div>
       </div>
-      <p className="mt-2 text-[11px] text-muted-foreground">{t("calcDisclaimer")}</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        {t("calcDisclaimer")}
+      </p>
       <button
         type="button"
         onClick={onApply}
