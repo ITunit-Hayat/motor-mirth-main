@@ -1,11 +1,114 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+/**
+ * Safely resolves an environment variable from both Vite (import.meta.env)
+ * and Node/SSR/Nitro/Vercel Serverless (process.env), cleaning extra whitespace,
+ * trailing slashes, or surrounding quotes that frequently cause 500 errors.
+ */
+function readEnv(key: string): string {
+  let val: unknown = undefined;
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true },
-});
+  // 1. Check import.meta.env (Vite client & SSR build-time)
+  try {
+    if (typeof import.meta !== "undefined" && import.meta.env) {
+      val = import.meta.env[key];
+    }
+  } catch {
+    // ignore
+  }
+
+  // 2. Check process.env (Node.js / Nitro SSR / Vercel Serverless Function runtime)
+  if (!val) {
+    try {
+      if (typeof process !== "undefined" && process.env) {
+        val = process.env[key];
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (typeof val !== "string") return "";
+  let clean = val.trim();
+  // Strip outer quotes if accidentally pasted in Vercel UI
+  if (
+    (clean.startsWith('"') && clean.endsWith('"')) ||
+    (clean.startsWith("'") && clean.endsWith("'"))
+  ) {
+    clean = clean.slice(1, -1).trim();
+  }
+  return clean;
+}
+
+function resolveSupabaseUrl(): string {
+  const candidate =
+    readEnv("VITE_SUPABASE_URL") ||
+    readEnv("NEXT_PUBLIC_SUPABASE_URL") ||
+    readEnv("SUPABASE_URL");
+
+  if (!candidate) return "";
+  let url = candidate.replace(/\/+$/, ""); // remove trailing slash
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
+  return url;
+}
+
+function resolveSupabaseAnonKey(): string {
+  return (
+    readEnv("VITE_SUPABASE_ANON_KEY") ||
+    readEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") ||
+    readEnv("SUPABASE_ANON_KEY")
+  );
+}
+
+const rawUrl = resolveSupabaseUrl();
+const rawKey = resolveSupabaseAnonKey();
+
+function isValidHttpUrl(stringUrl: string): boolean {
+  try {
+    const parsed = new URL(stringUrl);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * True only when real, valid Supabase credentials are provided.
+ * When false, the application gracefully degrades to local data
+ * without throwing unhandled exceptions or crashing with HTTP 500.
+ */
+export const isSupabaseConfigured: boolean = Boolean(
+  rawUrl &&
+    rawKey &&
+    isValidHttpUrl(rawUrl) &&
+    !rawUrl.includes("placeholder-project"),
+);
+
+// Safe fallback credentials so createClient never throws during SSR or boot
+const FALLBACK_URL = "https://placeholder-project.supabase.co";
+const FALLBACK_KEY = "placeholder-anon-key";
+
+const effectiveUrl = isSupabaseConfigured ? rawUrl : FALLBACK_URL;
+const effectiveKey = isSupabaseConfigured ? rawKey : FALLBACK_KEY;
+
+if (!isSupabaseConfigured && typeof window !== "undefined") {
+  console.warn(
+    "⚠️ [MZAB MOTORS] Supabase credentials not found or incomplete. Falling back to local data mode. Please configure VITE_SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and VITE_SUPABASE_ANON_KEY in Vercel.",
+  );
+}
+
+export const supabase: SupabaseClient = createClient(
+  effectiveUrl,
+  effectiveKey,
+  {
+    auth: {
+      persistSession: typeof window !== "undefined",
+      autoRefreshToken: typeof window !== "undefined",
+    },
+  },
+);
 
 /** Row shapes as stored in Postgres (snake_case). */
 export type CarRow = {

@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { supabase, type ProfileRow } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, type ProfileRow } from "@/lib/supabase";
 
 export type Profile = {
   id: string;
@@ -68,14 +68,27 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!mounted) return;
-      setSession(data.session);
-      if (data.session) await loadProfile(data.session.user.id);
-      if (mounted) setLoading(false);
-    });
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
+    supabase.auth
+      .getSession()
+      .then(async ({ data }) => {
+        if (!mounted) return;
+        setSession(data.session);
+        if (data.session) await loadProfile(data.session.user.id);
+        if (mounted) setLoading(false);
+      })
+      .catch((err) => {
+        console.warn("Auth getSession error:", err);
+        if (mounted) setLoading(false);
+      });
+
     const { data: sub } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
+        if (!mounted) return;
         setSession(newSession);
         if (newSession) await loadProfile(newSession.user.id);
         else setProfile(null);
@@ -83,7 +96,7 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     );
     return () => {
       mounted = false;
-      sub.subscription.unsubscribe();
+      sub?.subscription?.unsubscribe();
     };
   }, [loadProfile]);
 
@@ -93,6 +106,13 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     fullName,
     phone,
   ) => {
+    if (!isSupabaseConfigured) {
+      return {
+        ok: false,
+        error:
+          "خدمة تسجيل الحساب غير متصلة بقاعدة البيانات (يرجى إدخال مفاتيح Supabase في Vercel).",
+      };
+    }
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return { ok: false, error: error.message };
     if (data.user) {
@@ -104,6 +124,13 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn: UserAuthState["signIn"] = async (email, password) => {
+    if (!isSupabaseConfigured) {
+      return {
+        ok: false,
+        error:
+          "خدمة تسجيل الدخول غير متصلة بقاعدة البيانات (يرجى إدخال مفاتيح Supabase في Vercel).",
+      };
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -113,12 +140,20 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut().catch(() => {});
+    }
     setSession(null);
     setProfile(null);
   };
 
   const updateProfile: UserAuthState["updateProfile"] = async (data) => {
+    if (!isSupabaseConfigured) {
+      return {
+        ok: false,
+        error: "يرجى ربط Supabase لتعديل الملف الشخصي.",
+      };
+    }
     if (!session) return { ok: false, error: "Not logged in" };
     const row: Record<string, unknown> = {};
     if (data.fullName !== undefined) row.full_name = data.fullName;

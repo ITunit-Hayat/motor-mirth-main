@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { supabase } from "./supabase";
+import { supabase, isSupabaseConfigured } from "./supabase";
 
 const CACHE_KEY = "vm_site_settings_cache"; // first-paint cache only — NOT the source of truth
 const TABLE = "site_settings";
@@ -50,7 +50,7 @@ function writeCache(s: SiteSettings) {
  * avoid Supabase's "cannot add postgres_changes callbacks … after subscribe"
  * crash when two channels share a name.
  */
-let current: SiteSettings = readCache();
+let current: SiteSettings = DEFAULT_SETTINGS;
 const listeners = new Set<(s: SiteSettings) => void>();
 let started = false;
 
@@ -62,6 +62,15 @@ function emit() {
 function startOnce() {
   if (started || typeof window === "undefined") return;
   started = true;
+
+  // Hydration-safe: apply client cached settings right after mount
+  const cached = readCache();
+  if (cached && (cached.phone !== DEFAULT_SETTINGS.phone || cached.siteName !== DEFAULT_SETTINGS.siteName || cached.email !== DEFAULT_SETTINGS.email)) {
+    current = cached;
+    emit();
+  }
+
+  if (!isSupabaseConfigured) return;
 
   void supabase
     .from(TABLE)
@@ -76,22 +85,29 @@ function startOnce() {
         };
         emit();
       }
+    })
+    .catch((err) => {
+      console.warn("Failed to load site settings:", err);
     });
 
-  supabase
-    .channel("site-settings-live")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: TABLE, filter: `id=eq.${ROW_ID}` },
-      (payload) => {
-        const row = payload.new as { data?: Partial<SiteSettings> } | undefined;
-        if (row?.data) {
-          current = { ...DEFAULT_SETTINGS, ...row.data };
-          emit();
-        }
-      },
-    )
-    .subscribe();
+  try {
+    supabase
+      .channel("site-settings-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: TABLE, filter: `id=eq.${ROW_ID}` },
+        (payload) => {
+          const row = payload.new as { data?: Partial<SiteSettings> } | undefined;
+          if (row?.data) {
+            current = { ...DEFAULT_SETTINGS, ...row.data };
+            emit();
+          }
+        },
+      )
+      .subscribe();
+  } catch (err) {
+    console.warn("Site settings realtime subscription failed:", err);
+  }
 }
 
 /**
@@ -130,6 +146,11 @@ export function useSettings(): [
     const prev = current;
     current = next;
     emit();
+
+    if (!isSupabaseConfigured) {
+      writeCache(next);
+      return;
+    }
 
     const { error } = await supabase
       .from(TABLE)

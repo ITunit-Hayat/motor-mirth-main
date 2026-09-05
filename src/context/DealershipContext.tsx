@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   supabase,
+  isSupabaseConfigured,
   type CarRow,
   type OrderRow,
   type OrderType,
@@ -124,6 +125,11 @@ async function writeCarRow(
   row: Record<string, unknown>,
   id?: string,
 ): Promise<CarRow> {
+  if (!isSupabaseConfigured) {
+    throw new Error(
+      "قاعدة بيانات Supabase غير متصلة. يرجى إضافة مفاتيح VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY في Vercel.",
+    );
+  }
   const payload = { ...row };
   for (let attempt = 0; attempt < 8; attempt++) {
     const query =
@@ -151,6 +157,11 @@ async function writeCarRow(
  * public inquiry/contact forms never hard-fail on schema drift.
  */
 async function writeOrderRow(row: Record<string, unknown>): Promise<OrderRow> {
+  if (!isSupabaseConfigured) {
+    throw new Error(
+      "تعذّر إرسال الطلب: يرجى إضافة مفاتيح Supabase في لوحة Vercel.",
+    );
+  }
   const payload = { ...row };
   for (let attempt = 0; attempt < 5; attempt++) {
     const { data, error } = await supabase
@@ -184,6 +195,10 @@ export function DealershipProvider({ children }: { children: ReactNode }) {
 
   const fetchCars = useCallback(async () => {
     setLoadingCars(true);
+    if (!isSupabaseConfigured) {
+      setLoadingCars(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from("cars")
@@ -191,14 +206,11 @@ export function DealershipProvider({ children }: { children: ReactNode }) {
         .order("created_at", { ascending: false });
       if (error) throw error;
       setError(null);
-      setCars((data as CarRow[]).map(toCar));
+      if (data && data.length > 0) {
+        setCars((data as CarRow[]).map(toCar));
+      }
     } catch (e) {
       console.warn("Cars load error:", e);
-      setError(
-        e instanceof Error
-          ? e.message
-          : "تعذّر تحميل السيارات من قاعدة البيانات",
-      );
     } finally {
       setLoadingCars(false);
     }
@@ -206,13 +218,19 @@ export function DealershipProvider({ children }: { children: ReactNode }) {
 
   const fetchOrders = useCallback(async () => {
     setLoadingOrders(true);
+    if (!isSupabaseConfigured) {
+      setLoadingOrders(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from("orders")
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      setOrders((data as OrderRow[]).map(toOrder));
+      if (data) {
+        setOrders((data as OrderRow[]).map(toOrder));
+      }
     } catch (e) {
       console.warn("Orders load error:", e);
     } finally {

@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export type AdminRole = "SuperAdmin" | "SalesAgent";
 
@@ -48,7 +48,7 @@ function emit() {
 }
 
 function startOnce() {
-  if (started || typeof window === "undefined") return;
+  if (started || typeof window === "undefined" || !isSupabaseConfigured) return;
   started = true;
 
   void supabase
@@ -61,22 +61,29 @@ function startOnce() {
         currentPasscode = data.passcode;
         emit();
       }
+    })
+    .catch((err) => {
+      console.warn("Failed to load admin passcode:", err);
     });
 
-  supabase
-    .channel("admin-config-live")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: TABLE, filter: `id=eq.${ROW_ID}` },
-      (payload) => {
-        const row = payload.new as { passcode?: string } | undefined;
-        if (row?.passcode) {
-          currentPasscode = row.passcode;
-          emit();
-        }
-      },
-    )
-    .subscribe();
+  try {
+    supabase
+      .channel("admin-config-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: TABLE, filter: `id=eq.${ROW_ID}` },
+        (payload) => {
+          const row = payload.new as { passcode?: string } | undefined;
+          if (row?.passcode) {
+            currentPasscode = row.passcode;
+            emit();
+          }
+        },
+      )
+      .subscribe();
+  } catch (err) {
+    console.warn("Admin realtime channel subscription failed:", err);
+  }
 }
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {

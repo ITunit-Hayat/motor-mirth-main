@@ -246,10 +246,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {t("contactShowroom")}
             </h4>
-            <ul className="mt-3 space-y-1.5 text-sm">
-              <li>{site.phone}</li>
-              <li>{site.email}</li>
-              <li>{site.address}</li>
+            <ul className="mt-3 space-y-1.5 text-sm" suppressHydrationWarning>
+              <li suppressHydrationWarning>{site.phone}</li>
+              <li suppressHydrationWarning>{site.email}</li>
+              <li suppressHydrationWarning>{site.address}</li>
             </ul>
           </div>
         </div>

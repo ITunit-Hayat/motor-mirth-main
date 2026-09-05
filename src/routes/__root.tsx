@@ -25,7 +25,7 @@ export const Route = createRootRouteWithContext<RouterCtx>()({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/mzab-logo.jpg", type: "image/jpeg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" },
@@ -41,7 +41,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
+      <body suppressHydrationWarning>{children}<Scripts /></body>
     </html>
   );
 }

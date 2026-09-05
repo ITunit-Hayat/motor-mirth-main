@@ -143,7 +143,7 @@ function ContactPage() {
                   <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {label}
                   </div>
-                  <div className="font-display font-bold">{val}</div>
+                  <div className="font-display font-bold" suppressHydrationWarning>{val}</div>
                 </div>
               </div>
             ))}

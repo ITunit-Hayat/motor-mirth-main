@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase, type AttributeRow } from "@/lib/supabase";
+import {
+  supabase,
+  isSupabaseConfigured,
+  type AttributeRow,
+} from "@/lib/supabase";
 
 export type AttributeCategory = AttributeRow["category"];
 
@@ -56,6 +60,10 @@ export function useAttributes(category: AttributeCategory) {
 
   const load = useCallback(async () => {
     setLoading(true);
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from("attributes")
@@ -82,6 +90,12 @@ export function useAttributes(category: AttributeCategory) {
     async (value: string) => {
       const trimmed = value.trim();
       if (!trimmed) return;
+      if (!isSupabaseConfigured) {
+        setValues((prev) =>
+          prev.includes(trimmed) ? prev : [...prev, trimmed].sort(),
+        );
+        return;
+      }
       const { data, error } = await supabase
         .from("attributes")
         .insert({ category, value: trimmed })
@@ -97,6 +111,9 @@ export function useAttributes(category: AttributeCategory) {
   );
 
   const remove = useCallback(async (id: string) => {
+    if (!isSupabaseConfigured) {
+      return;
+    }
     const { error } = await supabase.from("attributes").delete().eq("id", id);
     if (error) throw new Error(error.message);
     setRows((prev) => {

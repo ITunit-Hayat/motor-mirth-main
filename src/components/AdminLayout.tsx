@@ -16,7 +16,7 @@ import {
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { AdminAuthProvider, useAdminAuth } from "@/context/AdminAuthContext";
 import { useDealership } from "@/context/DealershipContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -161,25 +161,30 @@ function AdminShell({ children }: { children: ReactNode }) {
 
   // Live notification: toast immediately when a new order/lead row is inserted.
   useEffect(() => {
-    const channel = supabase
-      .channel("admin-orders-live")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "orders" },
-        (payload) => {
-          const name =
-            (payload.new as { customer_name?: string })?.customer_name ??
-            "عميل";
-          toast.message("طلب جديد وارد", {
-            description: `قام ${name} بتقديم طلب جديد للتو.`,
-          });
-          setNewCount((n) => n + 1);
-        },
-      )
-      .subscribe();
-    return () => {
-      void supabase.removeChannel(channel);
-    };
+    if (!isSupabaseConfigured || typeof window === "undefined") return;
+    try {
+      const channel = supabase
+        .channel("admin-orders-live")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "orders" },
+          (payload) => {
+            const name =
+              (payload.new as { customer_name?: string })?.customer_name ??
+              "عميل";
+            toast.message("طلب جديد وارد", {
+              description: `قام ${name} بتقديم طلب جديد للتو.`,
+            });
+            setNewCount((n) => n + 1);
+          },
+        )
+        .subscribe();
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    } catch (err) {
+      console.warn("Orders realtime channel failed:", err);
+    }
   }, []);
 
   const nav = [
