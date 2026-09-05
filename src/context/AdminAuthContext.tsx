@@ -208,7 +208,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAdminAuth() {
+export function useAdminAuth(): AdminAuthState {
   const ctx = useContext(AdminAuthContext);
   if (!ctx) {
     return {

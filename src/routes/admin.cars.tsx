@@ -48,6 +48,7 @@ const STATUS_STYLES: Record<CarStatus, string> = {
   Draft: "bg-muted text-muted-foreground border-border",
   Reserved: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
   Sold: "bg-slate-500/15 text-slate-600 dark:text-slate-300 border-slate-500/30",
+  PendingReview: "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30",
 };
 
 const STATUS_NAMES_AR: Record<CarStatus, string> = {
@@ -55,6 +56,7 @@ const STATUS_NAMES_AR: Record<CarStatus, string> = {
   Draft: "مسودة",
   Reserved: "محجوز",
   Sold: "تم البيع",
+  PendingReview: "قيد المراجعة",
 };
 
 function ManageCars() {
@@ -327,7 +329,7 @@ function CarModal({
                 onChange={(v) => set("year", Number(v))}
               />
               <Field
-                label="السعر ($ USD)"
+                label="السعر (د.ج / DZD)"
                 type="number"
                 value={String(f.price)}
                 onChange={(v) => set("price", Number(v))}

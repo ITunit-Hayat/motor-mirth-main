@@ -19,7 +19,7 @@ import { useUserAuth } from "@/context/UserAuthContext";
 import type { CarStatus } from "@/data/initialCars";
 
 export const Route = createFileRoute("/my-listings")({
-  head: () => ({ meta: [{ title: "إعلاناتي — VelocityMotors" }] }),
+  head: () => ({ meta: [{ title: "إعلاناتي — MZAB MOTORS" }] }),
   component: MyListings,
 });
 

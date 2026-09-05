@@ -66,13 +66,16 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center gap-3">
           <Link
             to="/"
-            className="flex items-center gap-2 font-display font-bold text-lg shrink-0"
+            className="flex items-center gap-2.5 font-display font-bold text-lg shrink-0 group"
           >
-            <span className="inline-grid place-items-center h-9 w-9 rounded-lg bg-gradient-accent text-white">
-              V
-            </span>
-            <span className="hidden sm:inline">
-              Velocity<span className="text-accent">Motors</span>
+            <img
+              src="/mzab-logo.jpg"
+              alt="M'ZAB MOTORS Logo"
+              className="h-10 w-10 rounded-full object-cover border border-accent/40 shadow-sm group-hover:scale-105 transition-transform"
+              referrerPolicy="no-referrer"
+            />
+            <span className="inline">
+              MZAB <span className="text-accent">MOTORS</span>
             </span>
           </Link>
 
@@ -174,11 +177,14 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <footer className="border-t border-border bg-card mt-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2 font-display font-bold text-lg">
-              <span className="inline-grid place-items-center h-9 w-9 rounded-lg bg-gradient-accent text-white">
-                V
-              </span>
-              <span>VelocityMotors</span>
+            <div className="flex items-center gap-2.5 font-display font-bold text-lg">
+              <img
+                src="/mzab-logo.jpg"
+                alt="MZAB MOTORS Logo"
+                className="h-9 w-9 rounded-full object-cover border border-accent/40 shadow-sm"
+                referrerPolicy="no-referrer"
+              />
+              <span>MZAB <span className="text-accent">MOTORS</span></span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
               {t("footerTagline")}
@@ -249,7 +255,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="border-t border-border">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 text-xs text-muted-foreground">
-            © {new Date().getFullYear()} VelocityMotors. {t("rightsReserved")}
+            © {new Date().getFullYear()} MZAB MOTORS. {t("rightsReserved")}
           </div>
         </div>
       </footer>

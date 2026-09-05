@@ -8,10 +8,11 @@ import {
 } from "react";
 
 export type Locale = "en" | "ar" | "fr";
+export type Language = Locale;
 export type Dict = Record<string, { en: string; ar: string; fr: string }>;
 
 const D: Dict = {
-  brand: { en: "VelocityMotors", ar: "فيلوسيتي موتورز", fr: "VelocityMotors" },
+  brand: { en: "MZAB MOTORS", ar: "مزاب موتورز", fr: "MZAB MOTORS" },
   navHome: { en: "Home", ar: "الرئيسية", fr: "Accueil" },
   navInventory: { en: "Inventory", ar: "المعرض", fr: "Inventaire" },
   navAbout: { en: "About", ar: "من نحن", fr: "À propos" },
@@ -399,9 +400,9 @@ const D: Dict = {
 
   aboutHeroTitle: { en: "Our story", ar: "قصتنا", fr: "Notre histoire" },
   aboutHeroBody: {
-    en: "What began as a single showroom in El Guerrara, in the palm groves of the Ghardaïa valley, has grown into one of the most trusted names in Algeria's automotive retail. We built VelocityMotors on a simple idea: treat every buyer like a friend, not a transaction. Today we serve thousands of drivers each year with a curated inventory of luxury, performance and everyday vehicles — each one inspected, priced fairly, and backed by our lifetime support promise.",
+    en: "What began as a single showroom in El Guerrara, in the palm groves of the Ghardaïa valley, has grown into one of the most trusted names in Algeria's automotive retail. We built MZAB MOTORS on a simple idea: treat every buyer like a friend, not a transaction. Today we serve thousands of drivers each year with a curated inventory of luxury, performance and everyday vehicles — each one inspected, priced fairly, and backed by our lifetime support promise.",
     ar: "انطلقنا من صالة عرض واحدة في مدينة القرارة، بين واحات وادي مزاب في ولاية غرداية، لنصبح أحد أكثر الأسماء الموثوقة في تجارة السيارات بالجزائر. فكرة بسيطة: معاملة كل عميل كصديق لا كصفقة. اليوم نخدم آلاف السائقين سنوياً بمخزون منتقى من السيارات الفاخرة والرياضية واليومية، كل سيارة مفحوصة، بسعر عادل، وبدعم مدى الحياة.",
-    fr: "Parti d'un seul showroom à El Guerrara, dans la vallée du M'Zab (Ghardaïa), VelocityMotors est devenu une référence en Algérie. Traiter chaque acheteur comme un ami. Aujourd'hui nous servons des milliers de conducteurs — inventaire sélectionné, inspecté, juste prix, support à vie.",
+    fr: "Parti d'un seul showroom à El Guerrara, dans la vallée du M'Zab (Ghardaïa), MZAB MOTORS est devenu une référence en Algérie. Traiter chaque acheteur comme un ami. Aujourd'hui nous servons des milliers de conducteurs — inventaire sélectionné, inspecté, juste prix, support à vie.",
   },
   aboutMissionTitle: { en: "Our mission", ar: "رسالتنا", fr: "Notre mission" },
   aboutMission: {
@@ -557,9 +558,9 @@ const D: Dict = {
     fr: "Imprimer la facture",
   },
   confirmAndPay: {
-    en: "Confirm & Reserve ($500)",
-    ar: "تأكيد ودفع العربون ($500)",
-    fr: "Confirmer & réserver (500 $)",
+    en: "Confirm & Reserve (50,000 DZD)",
+    ar: "تأكيد ودفع العربون (50,000 د.ج)",
+    fr: "Confirmer & réserver (50 000 DZD)",
   },
 
   sellHeroTitle: {
@@ -592,9 +593,9 @@ const D: Dict = {
     fr: "État du véhicule",
   },
   askingPrice: {
-    en: "Your Asking Price ($)",
-    ar: "السعر المطلوب ($)",
-    fr: "Prix souhaité ($)",
+    en: "Your Asking Price (DZD)",
+    ar: "السعر المطلوب (د.ج)",
+    fr: "Prix souhaité (DZD)",
   },
   uploadPhotos: {
     en: "Upload Car Photos",
@@ -629,6 +630,10 @@ const D: Dict = {
 type Ctx = {
   locale: Locale;
   setLocale: (l: Locale) => void;
+  language: Locale;
+  setLanguage: (l: Locale) => void;
+  lang: Locale;
+  setLang: (l: Locale) => void;
   dir: "ltr" | "rtl";
   t: (k: keyof typeof D) => string;
   dict: Dict;
@@ -682,6 +687,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     () => ({
       locale,
       setLocale: setLocaleState,
+      language: locale,
+      setLanguage: setLocaleState,
+      lang: locale,
+      setLang: setLocaleState,
       dir: locale === "ar" ? "rtl" : "ltr",
       t: (k) => (D[k] && D[k][locale]) || (D[k] && D[k].en) || String(k),
       dict: D,

@@ -9,10 +9,10 @@ import { PhoneInput } from "@/components/PhoneInput";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "تسجيل الدخول — VelocityMotors" },
+      { title: "تسجيل الدخول — MZAB MOTORS" },
       {
         name: "description",
-        content: "سجّل دخولك أو أنشئ حساباً جديداً لنشر إعلان سيارتك.",
+        content: "سجّل دخولك أو أنشئ حساباً جديداً لنشر إعلان سيارتك في منصة مزاب موتورز.",
       },
     ],
   }),

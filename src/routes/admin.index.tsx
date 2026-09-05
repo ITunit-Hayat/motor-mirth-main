@@ -18,7 +18,7 @@ import { useAnalytics, resetAnalytics } from "@/lib/analytics";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "لوحة التحكم — VelocityMotors" }] }),
+  head: () => ({ meta: [{ title: "لوحة التحكم — MZAB MOTORS" }] }),
   component: AdminHome,
 });
 

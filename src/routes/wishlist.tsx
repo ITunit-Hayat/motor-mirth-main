@@ -9,7 +9,7 @@ import { useFavorites } from "@/lib/favorites";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/wishlist")({
-  head: () => ({ meta: [{ title: "Wishlist — VelocityMotors" }] }),
+  head: () => ({ meta: [{ title: "قائمة المفضلة — MZAB MOTORS" }] }),
   component: WishlistPage,
 });
 

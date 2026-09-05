@@ -12,10 +12,10 @@ import { WILAYAS, GHARDAIA_COMMUNES } from "@/data/wilayas";
 export const Route = createFileRoute("/post-car")({
   head: () => ({
     meta: [
-      { title: "انشر إعلان سيارتك — VelocityMotors" },
+      { title: "انشر إعلان سيارتك — MZAB MOTORS" },
       {
         name: "description",
-        content: "انشر إعلان بيع سيارتك مجاناً وتواصل مع المشترين مباشرة.",
+        content: "انشر إعلان بيع سيارتك مجاناً وتواصل مع المشترين مباشرة عبر منصة مزاب موتورز.",
       },
     ],
   }),

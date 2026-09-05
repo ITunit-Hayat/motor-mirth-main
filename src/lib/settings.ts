@@ -17,9 +17,9 @@ export type SiteSettings = {
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  siteName: "VelocityMotors",
+  siteName: "MZAB MOTORS",
   phone: "+213555000000",
-  email: "hello@velocitymotors.co",
+  email: "contact@mzabmotors.dz",
   address: "القرارة، ولاية غرداية، الجزائر",
   whatsapp: "+213555000000",
   showDiscountBanner: true,

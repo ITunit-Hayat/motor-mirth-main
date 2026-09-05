@@ -28,11 +28,11 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/sell")({
   head: () => ({
     meta: [
-      { title: "Sell Your Car — Instant Cash Offer | VelocityMotors" },
+      { title: "بيع سيارتك — عروض فورية | MZAB MOTORS" },
       {
         name: "description",
         content:
-          "Sell your luxury or certified vehicle quickly with transparent valuation, free 200-point inspection, and instant payout.",
+          "بع سيارتك أو استبدلها بأعلى سعر مع تقييم فوري وفحص معتمد من منصة مزاب موتورز.",
       },
     ],
   }),

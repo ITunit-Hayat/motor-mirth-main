@@ -34,7 +34,14 @@ export type CarRow = {
   created_at: string;
 };
 
-export type OrderType = "Purchase" | "TestDrive" | "Financing" | "Contact";
+export type OrderType =
+  | "Purchase"
+  | "TestDrive"
+  | "Financing"
+  | "Contact"
+  | "Reservation"
+  | "SellMyCar"
+  | "TradeIn";
 export type OrderStatus = "New" | "Processing" | "Contacted" | "Closed";
 
 export type OrderRow = {

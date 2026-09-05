@@ -1,6 +1,6 @@
 {
-  "name": "Velocity Motors Admin Dashboard",
-  "description": "Comprehensive dealership management dashboard featuring real-time KPIs, inventory controls, order workflow, media handling with watermark/compression, dynamic car attributes, and role-based access control (RBAC).",
+  "name": "MZAB MOTORS",
+  "description": "منصة مزاب موتورز الرائدة لتجارة وشراء وبيع السيارات في الجزائر بالدينار الجزائري.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

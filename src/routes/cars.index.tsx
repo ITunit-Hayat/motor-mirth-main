@@ -28,11 +28,11 @@ export const Route = createFileRoute("/cars/")({
   },
   head: () => ({
     meta: [
-      { title: "Browse Inventory — VelocityMotors" },
+      { title: "معرض السيارات — MZAB MOTORS" },
       {
         name: "description",
         content:
-          "Search and filter our premium luxury and certified pre-owned inventory.",
+          "تصفح وبحث في أسطول سيارات مزاب موتورز الفاخرة والمستعملة المعتمدة.",
       },
     ],
   }),

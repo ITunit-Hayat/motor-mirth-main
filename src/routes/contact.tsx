@@ -8,7 +8,7 @@ import { useDealership } from "@/context/DealershipContext";
 import { useSiteSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({ meta: [{ title: "Contact — VelocityMotors" }] }),
+  head: () => ({ meta: [{ title: "تواصل معنا — MZAB MOTORS" }] }),
   component: ContactPage,
 });
 

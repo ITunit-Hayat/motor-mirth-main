@@ -1,4 +1,5 @@
-import { Outlet, createRootRouteWithContext, HeadContent, Scripts, type ReactNode } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import type { QueryClient } from "@tanstack/react-query";
@@ -16,11 +17,11 @@ export const Route = createRootRouteWithContext<RouterCtx>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#0b1220" },
-      { title: "VelocityMotors — Premium Automotive Marketplace" },
-      { name: "description", content: "Discover, finance and own premium vehicles. Transparent pricing, certified inventory, lifetime support." },
-      { property: "og:title", content: "VelocityMotors — Premium Cars Marketplace" },
-      { property: "og:description", content: "Premium cars marketplace — browse, finance, own." },
+      { name: "theme-color", content: "#2d1c13" },
+      { title: "MZAB MOTORS — منصة مزاب موتورز للسيارات" },
+      { name: "description", content: "منصة مزاب موتورز الرائدة لتجارة وشراء وبيع السيارات في الجزائر بالدينار الجزائري." },
+      { property: "og:title", content: "MZAB MOTORS — مزاب موتورز" },
+      { property: "og:description", content: "منصة مزاب موتورز لشراء وبيع وحجز أحدث السيارات المعتمدة بالدينار الجزائري." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

@@ -210,8 +210,14 @@ function AdminShell({ children }: { children: ReactNode }) {
               to="/admin"
               className="font-display font-bold text-lg shrink-0 flex items-center gap-2"
             >
+              <img
+                src="/mzab-logo.jpg"
+                alt="MZAB MOTORS Logo"
+                className="h-8 w-8 rounded-full object-cover border border-accent/40 shadow-sm"
+                referrerPolicy="no-referrer"
+              />
               <span>
-                Velocity<span className="text-accent">Motors</span>
+                MZAB <span className="text-accent">MOTORS</span>
               </span>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/20">
                 لوحة الإدارة

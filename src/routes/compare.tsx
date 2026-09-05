@@ -6,7 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { clearCompare, useCompareList } from "@/lib/compare";
 
 export const Route = createFileRoute("/compare")({
-  head: () => ({ meta: [{ title: "Compare vehicles — VelocityMotors" }] }),
+  head: () => ({ meta: [{ title: "مقارنة السيارات — MZAB MOTORS" }] }),
   component: ComparePage,
 });
 

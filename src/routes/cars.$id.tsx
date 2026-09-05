@@ -447,7 +447,7 @@ function CarDetails() {
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground pt-2 border-t border-border/80">
-                  هذا إعلان من عضو وليس من مخزون VelocityMotors مباشرة — تأكد من
+                  هذا إعلان من عضو وليس من مخزون MZAB MOTORS مباشرة — تأكد من
                   فحص السيارة قبل الدفع.
                 </p>
               </div>
@@ -470,8 +470,8 @@ function CarDetails() {
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {locale === "ar"
-                        ? "احجز الآن بعربون 500$ فقط وادفع المتبقي عند الاستلام"
-                        : "Hold this car for 7 days with just a $500 refundable deposit."}
+                        ? "احجز الآن بعربون 50,000 د.ج فقط وادفع المتبقي عند الاستلام"
+                        : "Hold this car for 7 days with just a 50,000 DZD refundable deposit."}
                     </p>
                   </div>
 
@@ -483,8 +483,8 @@ function CarDetails() {
                     >
                       <Lock className="h-4 w-4" />
                       {locale === "ar"
-                        ? "احجز السيارة الآن (عربون $500)"
-                        : "Reserve Vehicle ($500 Hold)"}
+                        ? "احجز السيارة الآن (عربون 50,000 د.ج)"
+                        : "Reserve Vehicle (50,000 DZD Hold)"}
                     </button>
 
                     <button
@@ -643,7 +643,7 @@ function CarDetails() {
             className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-accent text-accent-foreground font-bold text-sm shadow-md"
           >
             <Lock className="h-4 w-4" />
-            {locale === "ar" ? "احجز الآن ($500)" : "Reserve ($500)"}
+            {locale === "ar" ? "احجز الآن (50,000 د.ج)" : "Reserve (50,000 DZD)"}
           </button>
           <a
             href={waHref}

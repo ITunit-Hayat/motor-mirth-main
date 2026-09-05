@@ -87,7 +87,7 @@ async function uploadOne(file: File, watermarkText: string): Promise<string> {
 export function MediaUploader({
   images,
   onChange,
-  watermarkText = "VelocityMotors",
+  watermarkText = "MZAB MOTORS",
 }: {
   images: string[];
   onChange: (images: string[]) => void;

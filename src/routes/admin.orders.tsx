@@ -382,7 +382,7 @@ function buildOrderPrintHtml(
 </style>
 </head>
 <body>
-  <div class="brand">Velocity<span>Motors</span></div>
+  <div class="brand">MZAB<span>MOTORS</span></div>
   <div class="muted">إشعار صفقة رسمي — طُبع بتاريخ ${esc(new Date().toLocaleString("ar-SA"))}</div>
 
   <h1>${esc(o.fullName)}</h1>
@@ -402,7 +402,7 @@ function buildOrderPrintHtml(
 
   ${rows.length ? `<div class="section"><h2>تفاصيل الصفقة والبيانات المالية</h2>${rows.join("")}</div>` : ""}
 
-  <div class="footer">Velocity Motors — تم إنشاء هذا الإشعار تلقائياً من لوحة الإدارة</div>
+  <div class="footer">MZAB MOTORS — تم إنشاء هذا الإشعار تلقائياً من لوحة الإدارة</div>
 </body>
 </html>`;
 }
@@ -430,11 +430,11 @@ function OrderCard({
   const waDigits = o.phone.replace(/\D/g, "");
   const waHref = waDigits
     ? `https://wa.me/${waDigits}?text=${encodeURIComponent(
-        `مرحباً ${o.fullName}، نتواصل معك من معرض فيلوسيتي موتورز بخصوص ${typeConfig.label} لسيارة ${o.carTitle}. كيف يمكننا خدمتك اليوم؟`,
+        `مرحباً ${o.fullName}، نتواصل معك من معرض مزاب موتورز بخصوص ${typeConfig.label} لسيارة ${o.carTitle}. كيف يمكننا خدمتك اليوم؟`,
       )}`
     : undefined;
   const mailHref = `mailto:${o.email}?subject=${encodeURIComponent(
-    `Velocity Motors: بخصوص ${typeConfig.label} لسيارة ${o.carTitle}`,
+    `MZAB MOTORS: بخصوص ${typeConfig.label} لسيارة ${o.carTitle}`,
   )}`;
 
   const handlePrint = () => {

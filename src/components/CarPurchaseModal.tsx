@@ -47,7 +47,7 @@ export function CarPurchaseModal({
   const [depositType, setDepositType] = useState<
     "standard" | "tenPercent" | "full" | "custom"
   >(initialMode === "buy" ? "full" : "standard");
-  const [customDeposit, setCustomDeposit] = useState<number>(1000);
+  const [customDeposit, setCustomDeposit] = useState<number>(50000);
   const [deliveryMethod, setDeliveryMethod] = useState<"showroom" | "delivery">(
     "showroom",
   );
@@ -79,7 +79,7 @@ export function CarPurchaseModal({
 
   if (!isOpen) return null;
 
-  const standardDeposit = 500;
+  const standardDeposit = 50000;
   const tenPercentDeposit = Math.round(car.price * 0.1);
   const fullPrice = car.price;
 
@@ -90,7 +90,7 @@ export function CarPurchaseModal({
         ? tenPercentDeposit
         : depositType === "full"
           ? fullPrice
-          : Math.max(100, customDeposit || 500);
+          : Math.max(10000, customDeposit || 50000);
 
   const remainingBalance = Math.max(0, car.price - currentDeposit);
 
@@ -119,7 +119,7 @@ export function CarPurchaseModal({
     }
 
     setSubmitting(true);
-    const generatedRef = `VEL-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
+    const generatedRef = `MZAB-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
 
     try {
       const orderNotes = JSON.stringify({
@@ -172,7 +172,7 @@ export function CarPurchaseModal({
   };
 
   const waConfirmationText = encodeURIComponent(
-    `Hello Velocity Motors, I have reserved ${car.year} ${car.title} (Booking Ref: ${orderRef}). My name is ${fullName}, Phone: ${phone}. Deposit: ${formatPrice(currentDeposit)}.`,
+    `Hello MZAB MOTORS, I have reserved ${car.year} ${car.title} (Booking Ref: ${orderRef}). My name is ${fullName}, Phone: ${phone}. Deposit: ${formatPrice(currentDeposit)}.`,
   );
   const waHref = `https://wa.me/${site.whatsapp.replace(/\D/g, "")}?text=${waConfirmationText}`;
 
@@ -761,18 +761,18 @@ export function CarPurchaseModal({
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <span className="text-muted-foreground">Bank:</span>
                     <span className="font-semibold">
-                      JPMorgan Chase Bank, N.A.
+                      BNA (Banque Nationale d'Algérie)
                     </span>
                     <span className="text-muted-foreground">Account Name:</span>
-                    <span className="font-semibold">Velocity Motors LLC</span>
+                    <span className="font-semibold">MZAB MOTORS SARL</span>
                     <span className="text-muted-foreground">
-                      IBAN / Account #:
+                      RIB / Account #:
                     </span>
                     <span className="font-mono font-bold">
-                      US89 0210 0002 1234 5678 90
+                      001 00450 0300001234 56
                     </span>
                     <span className="text-muted-foreground">SWIFT / BIC:</span>
-                    <span className="font-mono font-bold">CHASUS33XXX</span>
+                    <span className="font-mono font-bold">BNALDZALXXX</span>
                   </div>
                   <p className="text-xs text-muted-foreground pt-2">
                     {locale === "ar"
@@ -853,7 +853,7 @@ export function CarPurchaseModal({
                 <div className="flex items-center justify-between border-b border-border pb-4">
                   <div>
                     <div className="font-display font-bold text-lg">
-                      Velocity Motors
+                      MZAB MOTORS
                     </div>
                     <div className="text-xs text-muted-foreground">
                       Official Reservation Certificate
