@@ -1,0 +1,6 @@
+{
+  "name": "MZAB MOTORS",
+  "description": "منصة مزاب موتورز الرائدة لتجارة وشراء وبيع السيارات في الجزائر بالدينار الجزائري.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
